@@ -1,254 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Overlay Generator</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&family=Montserrat:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,700;1,400&family=Lato:ital,wght@0,400;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: row;
-        background-color: #24252e;
-        color: #ffffff;
-        font-size: 24px;
+      :root {
+        --bg: #17171b;
+        --panel: #1f2126;
+        --muted: #bfc7d9;
+        --accent: #3b66ad;
+        --card: #23262b;
+        --radius: 10px;
       }
-
-      .left-panel {
-        flex: 3;
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(180deg, var(--bg), #0f0f11);
+        color: var(--muted);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        align-items: stretch;
         padding: 20px;
+        gap: 20px;
+      }
+      .app {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 460px 900px;
+        gap: 20px;
+        align-items: start;
+        margin: auto;
+        max-width: 1200px;
+        margin-left: 100px;
+      }
+      .panel {
+        background: var(--panel);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        height: 800px;
+        gap: 12px;
+        min-height: 560px;
       }
-
-      .right-panel {
-        flex: 7;
-        padding: 20px;
-        height: 600px;
+      .panel h2 { margin: 0 0 4px 0; color: #fff; font-size: 18px; letter-spacing: 0.2px; }
+      .controls { display: flex; flex-direction: column; gap: 10px; overflow: auto; padding-right: 6px; }
+      .row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+      label { font-size: 13px; color: var(--muted); min-width: 160px; }
+      input[type="number"], input[type="text"], select {
+        width: 120px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        background: #f4f6fa;
+        color: #111827;
+        font-size: 13px;
       }
-
-      .transform {
-        padding-top: 20px;
-        max-height: 200px;
-      }
-
-      #canvas {
-        border: 3px solid black;
-        width: 100%;
-        height: 100%;
-      }
-
-      .input-group {
-        margin-bottom: 10px;
-      }
-
-      .slider-group input[type='range'] {
-        width: 200px;
-        float: right;
-        margin-right: 10px;
-      }
-
-      .slider-group input[type='number'] {
-        width: 60px;
-        float: right;
-        margin-right: 10px;
-      }
-
-      /* Slider styling */
-      input[type='range'] {
+      .colour-wrap { display: flex; align-items: center; gap: 8px; }
+      input[type="color"] { width: 46px; height: 34px; border-radius: 6px; padding: 0; border: 0; }
+      input[type="text"].hex { width: 90px; }
+      .slider-controls { display: flex; align-items: center; gap: 12px; width: 260px; }
+      input[type="range"] { flex: 1; height: 10px; background: transparent; }
+      input[type="range"]::-webkit-slider-runnable-track { height: 10px; border-radius: 10px; background: #d9d9d9; }
+      input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
-        height: 10px;
-        background: #dbdbdb;
-        border-radius: 5px;
-        background-image: linear-gradient(#355b94, #355b94);
-        background-repeat: no-repeat;
-      }
-
-      input[type='range']::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 20px;
-        width: 20px;
+        height: 18px;
+        width: 18px;
         border-radius: 50%;
-        background: #355b94;
-        cursor: pointer;
-        box-shadow: 0 0 2px 0 #555;
+        background: var(--accent);
+        margin-top: -4px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
       }
-
-      input[type='range']::-webkit-slider-runnable-track {
-        -webkit-appearance: none;
-        box-shadow: none;
-        border: none;
-        background: transparent;
-      }
-
-      /* Remove number input arrows */
-      input[type='number']::-webkit-inner-spin-button,
-      input[type='number']::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
-      input[type='number'] {
-        -moz-appearance: textfield;
-      }
-
-      input[type='number'],
-      input[type='text'],
-      select {
-        border: 1px solid black;
-        border-radius: 6px;
-        padding: 3px;
-        float: right;
-        background-color: #dbdbdb;
-      }
-
-      select {
-        width: 200px;
-        height: 30px;
-      }
-
-      .input-group input[type='color'] {
-        width: 50px;
-        height: 30px;
-        padding: 0;
-        margin-right: 10px;
-        float: right;
-      }
-
-      .input-group input[type='text'] {
-        width: 80px;
-        float: right;
-        margin-right: 10px;
-      }
-
-      button {
-        background-color: #355b94;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        padding: 12px 24px;
+      .value-badge {
+        min-width: 48px;
         text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 24px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0b1220;
+        font-weight: 600;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+        font-size: 13px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
       }
-
-      button:hover {
-        background-color: #2f538a;
+      button.primary { background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
+      button.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.06); color: var(--muted); padding: 8px 12px; border-radius: 8px; }
+      .transform { margin-top: auto; padding-top: 10px; border-top: 1px dashed rgba(255, 255, 255, 0.03); font-size: 13px; }
+      .transform span { display: inline-block; margin-right: 8px; color: #dbe5ff; }
+      .preview {
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius: var(--radius);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 560px;
+        align-items: stretch;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
       }
-
-      #cropRight,
-      #cropBottom {
-        padding-left: 100px;
-        text-align: left;
+      .canvas-wrap {
+        background: var(--card);
+        border-radius: 8px;
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
       }
-
-      .menu {
-        position: absolute;
-        bottom: 0;
-        right: 0;
+      canvas {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 6px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+        max-width: 100%;
+        height: auto;
+        border: 2px solid rgba(255, 255, 255, 0.04);
       }
-
-      #currentPage {
-        background-color: #2f538a;
+      .top-actions { display: flex; gap: 8px; align-items: center; }
+      .small { font-size: 12px; color: var(--muted); }
+      @media (max-width: 900px) {
+        .app { grid-template-columns: 1fr; }
+        body { padding: 12px; }
       }
     </style>
   </head>
 
   <body>
-    <div class="left-panel">
-      <div class="input-group">
-        <label for="canvasWidth">Enter OBS canvas width:</label>
-        <input type="number" id="canvasWidth" value="1920" />
-      </div>
-      <div class="input-group">
-        <label for="canvasHeight">Enter OBS canvas height:</label>
-        <input type="number" id="canvasHeight" value="1080" />
-      </div>
-      <div class="input-group">
-        <label for="colour1">Enter first colour:</label>
-        <input type="text" id="colour1Text" placeholder="Hex code" />
-        <input type="color" id="colour1" value="#ffb0c5" />
-      </div>
-      <div class="input-group">
-        <label for="colour2">Enter second colour:</label>
-        <input type="text" id="colour2Text" placeholder="Hex code" />
-        <input type="color" id="colour2" value="#99cdf0" />
-      </div>
-      <div class="input-group">
-        <label for="colourText">Enter text colour:</label>
-        <input type="text" id="colourTextText" placeholder="Hex code" />
-        <input type="color" id="colourText" value="#000000" />
-      </div>
-      <div class="input-group slider-group">
-        <label for="pixelCount">Number of pixels:</label>
-        <input type="number" id="pixelCountNumber" value="9" min="1" max="50" />
-        <input type="range" id="pixelCount" value="9" min="1" max="50" />
-      </div>
-      <div class="input-group slider-group">
-        <label for="opacity">Opacity:</label>
-        <input type="number" id="opacityNumber" value="100" min="0" max="100" />
-        <input type="range" id="opacity" value="100" min="0" max="100" />
-      </div>
-      <div class="input-group slider-group">
-        <label for="textSize">Text size:</label>
-        <input
-          type="number"
-          id="textSizeNumber"
-          value="40"
-          min="10"
-          max="100"
-        />
-        <input type="range" id="textSize" value="40" min="10" max="100" />
-      </div>
-      <div class="input-group">
-        <label for="numberStyle">Number style:</label>
-        <select id="numberStyle">
-          <option value="stacked">Stacked Digits</option>
-          <option value="compact">Compact (Small First Digit)</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="fontStyle">Font style:</label>
-        <select id="fontStyle">
-          <option value="Inter-400">Inter</option>
-          <option value="Inter-700">Inter Bold</option>
-          <option value="Roboto-400">Roboto</option>
-          <option value="Roboto-700">Roboto Bold</option>
-          <option value="Roboto-400i">Roboto Italic</option>
-          <option value="Oswald-400">Oswald</option>
-          <option value="Oswald-700">Oswald Bold</option>
-          <option value="Montserrat-400">Montserrat</option>
-          <option value="Montserrat-700">Montserrat Bold</option>
-          <option value="Montserrat-400i">Montserrat Italic</option>
-          <option value="Open Sans-400">Open Sans</option>
-          <option value="Open Sans-700">Open Sans Bold</option>
-          <option value="Open Sans-400i">Open Sans Italic</option>
-          <option value="Lato-400">Lato</option>
-          <option value="Lato-700">Lato Bold</option>
-          <option value="Lato-400i">Lato Italic</option>
-        </select>
-      </div>
-      <button id="downloadBtn" onclick="downloadImage()" disabled="true">
-        Download Image
-      </button>
-      <div class="transform">
-        Transform Settings:<br /><br />
-        <span id="cropLeft">Left: </span> <span id="cropRight">Right: </span
-        ><br /><br />
-        <span id="cropTop">Top: </span> <span id="cropBottom">Bottom: </span
-        ><br />
-      </div>
+    <div class="app">
+      <aside class="panel" aria-label="Controls">
+        <h2>Overlay Generator</h2>
+        <div class="controls">
+          <div class="row">
+            <label for="canvasWidth">OBS canvas width</label>
+            <input type="number" id="canvasWidth" value="1920" min="1" />
+          </div>
+          <div class="row">
+            <label for="canvasHeight">OBS canvas height</label>
+            <input type="number" id="canvasHeight" value="1080" min="1" />
+          </div>
+          <div class="row">
+            <label for="colour1">Primary colour</label>
+            <div class="colour-wrap">
+              <input type="text" id="colour1Text" class="hex" placeholder="#RRGGBB"/>
+              <input type="color" id="colour1" value="#ffb0c5" />
+            </div>
+          </div>
+          <div class="row">
+            <label for="colour2">Secondary colour</label>
+            <div class="colour-wrap">
+              <input type="text" id="colour2Text" class="hex" placeholder="#RRGGBB"/>
+              <input type="color" id="colour2" value="#99cdf0" />
+            </div>
+          </div>
+          <div class="row">
+            <label for="colourText">Text colour</label>
+            <div class="colour-wrap">
+              <input type="text" id="colourTextText" class="hex" placeholder="#RRGGBB"/>
+              <input type="color" id="colourText" value="#000000" />
+            </div>
+          </div>
+          <div class="row">
+            <label for="pixelCount">Number of pixels</label>
+            <div class="slider-controls">
+              <input type="range" id="pixelCount" value="9" min="1" max="50" aria-label="Number of pixels"/>
+              <div class="value-badge" id="pixelCountValue">9</div>
+            </div>
+          </div>
+          <div class="row">
+            <label for="opacity">Opacity</label>
+            <div class="slider-controls">
+              <input type="range" id="opacity" value="100" min="0" max="100" aria-label="Opacity"/>
+              <div class="value-badge" id="opacityValue">100</div>
+            </div>
+          </div>
+          <div class="row">
+            <label for="textSize">Text size</label>
+            <div class="slider-controls">
+              <input type="range" id="textSize" value="40" min="10" max="100" aria-label="Text size"/>
+              <div class="value-badge" id="textSizeValue">40</div>
+            </div>
+          </div>
+          <div class="row">
+            <label for="fontStyle">Font</label>
+            <select id="fontStyle">
+              <option value="Inter-400">Inter</option>
+              <option value="Inter-700">Inter Bold</option>
+              <option value="Roboto-400">Roboto</option>
+              <option value="Roboto-700">Roboto Bold</option>
+              <option value="Roboto-400i">Roboto Italic</option>
+              <option value="Oswald-400">Oswald</option>
+              <option value="Oswald-700">Oswald Bold</option>
+              <option value="Montserrat-400">Montserrat</option>
+              <option value="Montserrat-700">Montserrat Bold</option>
+              <option value="Open Sans-400">Open Sans</option>
+              <option value="Lato-400">Lato</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+            <button class="primary" id="downloadBtn" onclick="downloadImage()" disabled>Download</button>
+            <button class="ghost" id="resetBtn" type="button">Reset</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="preview">
+        <div class="top-actions">
+          <div style="flex: 1">Preview</div>
+          <div class="small">
+            Canvas: <span id="currentCanvas">1920×1080</span>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas" width="1280" height="720"></canvas>
+        </div>
+      </main>
     </div>
-    <div class="right-panel">
-      <canvas id="canvas"></canvas>
-    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const sliders = [
+          { id: "pixelCount", valueEl: "pixelCountValue" },
+          { id: "opacity", valueEl: "opacityValue" },
+          { id: "textSize", valueEl: "textSizeValue" },
+        ];
+        function updateSliderBackground(slider) {
+          const min = Number(slider.min || 0);
+          const max = Number(slider.max || 100);
+          const val = Number(slider.value || 0);
+          const pct = ((val - min) / (max - min)) * 100;
+          slider.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d9d9d9 ${pct}%)`;
+        }
+        sliders.forEach((s) => {
+          const slider = document.getElementById(s.id);
+          const valueEl = document.getElementById(s.valueEl);
+          if (!slider || !valueEl) return;
+          valueEl.textContent = slider.value;
+          slider.addEventListener("input", () => {
+            valueEl.textContent = slider.value;
+            updateSliderBackground(slider);
+            if (typeof generateImage === "function") generateImage();
+          });
+          updateSliderBackground(slider);
+        });
+        const resetBtn = document.getElementById("resetBtn");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            document.getElementById("canvasWidth").value = 1920;
+            document.getElementById("canvasHeight").value = 1080;
+            const p = document.getElementById("pixelCount");
+            if (p) { p.value = 9; document.getElementById("pixelCountValue").textContent = 9; updateSliderBackground(p); }
+            const o = document.getElementById("opacity");
+            if (o) { o.value = 100; document.getElementById("opacityValue").textContent = 100; updateSliderBackground(o); }
+            const t = document.getElementById("textSize");
+            if (t) { t.value = 40; document.getElementById("textSizeValue").textContent = 40; updateSliderBackground(t); }
+            const c1 = document.getElementById("colour1"); if (c1) c1.value = "#ffb0c5";
+            const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
+            const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
+            if (typeof generateImage === "function") generateImage();
+          });
+        }
+        function updateCanvasLabel() {
+          const w = document.getElementById("canvasWidth").value || "0";
+          const h = document.getElementById("canvasHeight").value || "0";
+          const el = document.getElementById("currentCanvas");
+          if (el) el.textContent = w + "×" + h;
+        }
+        ["canvasWidth","canvasHeight"].forEach((id) => document.getElementById(id).addEventListener("input", updateCanvasLabel));
+        updateCanvasLabel();
+        const colorPairs = [
+          { txt: "colour1Text", pick: "colour1" },
+          { txt: "colour2Text", pick: "colour2" },
+          { txt: "colourTextText", pick: "colourText" },
+        ];
+        colorPairs.forEach(({ txt, pick }) => {
+          const t = document.getElementById(txt);
+          const p = document.getElementById(pick);
+          if (!t || !p) return;
+          t.value = p.value.toUpperCase();
+          t.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) { p.value = val; if (typeof generateImage === "function") generateImage(); }
+          });
+          p.addEventListener("input", () => { t.value = p.value.toUpperCase(); if (typeof generateImage === "function") generateImage(); });
+        });
+      });
+    </script>
+
     <script src="genScript.js"></script>
   </body>
 </html>
