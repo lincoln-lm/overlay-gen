@@ -181,12 +181,10 @@
 	      <h3 style="margin:0;">Transform Settings</h3>
 	      <button id="closeModal" class="close-btn">&times;</button>
 	    </div>
-	    <div id="transformModalPanel" style="display:flex; flex-direction: column; gap:4px;">
-	      <span id="cropLeft">Left: 0</span>
-	      <span id="cropRight">Right: 0</span>
-	      <span id="cropTop">Top: 0</span>
-	      <span id="cropBottom">Bottom: 0</span>
-	    </div>
+		<div id="transformModalPanel" style="display:flex; flex-direction: column; gap:8px;">
+		  <span id="cropHorizontal">Left: 0 Right: 0</span>
+		  <span id="cropVertical">Top: 0 Bottom: 0</span>
+		</div>
 	  </div>
 	</div>
     <div class="app">
@@ -572,16 +570,21 @@
 
         const dl = document.getElementById('downloadBtn');
         if(dl) dl.disabled = false;
-		const left = Math.round(canvasWidth / 2 - pixels * pixelWidth);
-		const right = Math.round(canvasWidth / 2 + pixels * pixelWidth);
-		const top = Math.round(canvasHeight / 2 - pixelHeight/2);
-		const bottom = Math.round(canvasHeight / 2 + pixelHeight/2);
 
+
+		const CENTER_WIDTH = 60;
+		const CENTER_HEIGHT = 580;
 		
-		document.getElementById('cropLeft').textContent = 'Left: ' + left;
-		document.getElementById('cropRight').textContent = 'Right: ' + right;
-		document.getElementById('cropTop').textContent = 'Top: ' + top;
-		document.getElementById('cropBottom').textContent = 'Bottom: ' + bottom;
+		const left = Math.max(0, Math.round((canvasWidth - CENTER_WIDTH) / 2));
+		const right = left; // symmetric
+		const top = Math.max(0, Math.round((canvasHeight - CENTER_HEIGHT) / 2));
+		const bottom = top; // symmetric
+		
+		const hEl = document.getElementById('cropHorizontal');
+		const vEl = document.getElementById('cropVertical');
+		
+		if (hEl) hEl.textContent = `Left: ${left} Right: ${right}`;
+		if (vEl) vEl.textContent = `Top: ${top} Bottom: ${bottom}`;
 
       }
 
