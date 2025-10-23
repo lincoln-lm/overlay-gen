@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Overlay Generator</title>
+    <title>Overlay Generator (updated)</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
@@ -33,12 +33,11 @@
       .app {
         width: 100%;
         display: grid;
-        grid-template-columns: 460px 900px;
+        grid-template-columns: 460px 1fr;
         gap: 20px;
         align-items: start;
         margin: auto;
-        max-width: 1200px;
-        margin-left: 100px;
+        max-width: 1400px;
       }
       .panel {
         background: var(--panel);
@@ -92,8 +91,6 @@
       }
       button.primary { background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
       button.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.06); color: var(--muted); padding: 8px 12px; border-radius: 8px; }
-      .transform { margin-top: auto; padding-top: 10px; border-top: 1px dashed rgba(255, 255, 255, 0.03); font-size: 13px; }
-      .transform span { display: inline-block; margin-right: 8px; color: #dbe5ff; }
       .preview {
         background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
         border-radius: var(--radius);
@@ -119,7 +116,7 @@
         background: rgba(255, 255, 255, 0.02);
         border-radius: 6px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
-        max-width: 100%;
+        width: 100%;
         height: auto;
         border: 2px solid rgba(255, 255, 255, 0.04);
       }
@@ -141,10 +138,12 @@
             <label for="canvasWidth">OBS canvas width</label>
             <input type="number" id="canvasWidth" value="1920" min="1" />
           </div>
+
           <div class="row">
             <label for="canvasHeight">OBS canvas height</label>
             <input type="number" id="canvasHeight" value="1080" min="1" />
           </div>
+
           <div class="row">
             <label for="colour1">Primary colour</label>
             <div class="colour-wrap">
@@ -152,6 +151,7 @@
               <input type="color" id="colour1" value="#ffb0c5" />
             </div>
           </div>
+
           <div class="row">
             <label for="colour2">Secondary colour</label>
             <div class="colour-wrap">
@@ -159,6 +159,7 @@
               <input type="color" id="colour2" value="#99cdf0" />
             </div>
           </div>
+
           <div class="row">
             <label for="colourText">Text colour</label>
             <div class="colour-wrap">
@@ -166,6 +167,7 @@
               <input type="color" id="colourText" value="#000000" />
             </div>
           </div>
+
           <div class="row">
             <label for="pixelCount">Number of pixels</label>
             <div class="slider-controls">
@@ -173,20 +175,39 @@
               <div class="value-badge" id="pixelCountValue">9</div>
             </div>
           </div>
+
           <div class="row">
-            <label for="opacity">Opacity</label>
+            <label for="pixelHeight">Pixel height</label>
             <div class="slider-controls">
-              <input type="range" id="opacity" value="100" min="0" max="100" aria-label="Opacity"/>
-              <div class="value-badge" id="opacityValue">100</div>
+              <input type="range" id="pixelHeight" value="8" min="1" max="50" aria-label="Pixel height"/>
+              <div class="value-badge" id="pixelHeightValue">8</div>
             </div>
           </div>
+
+          <div class="row">
+            <label for="opacityPixels">Opacity (pixels)</label>
+            <div class="slider-controls">
+              <input type="range" id="opacityPixels" value="100" min="0" max="100" aria-label="Opacity pixels"/>
+              <div class="value-badge" id="opacityPixelsValue">100</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="opacityText">Opacity (text)</label>
+            <div class="slider-controls">
+              <input type="range" id="opacityText" value="100" min="0" max="100" aria-label="Opacity text"/>
+              <div class="value-badge" id="opacityTextValue">100</div>
+            </div>
+          </div>
+
           <div class="row">
             <label for="textSize">Text size</label>
             <div class="slider-controls">
-              <input type="range" id="textSize" value="40" min="10" max="100" aria-label="Text size"/>
+              <input type="range" id="textSize" value="40" min="10" max="200" aria-label="Text size"/>
               <div class="value-badge" id="textSizeValue">40</div>
             </div>
           </div>
+
           <div class="row">
             <label for="fontStyle">Font</label>
             <select id="fontStyle">
@@ -203,6 +224,7 @@
               <option value="Lato-400">Lato</option>
             </select>
           </div>
+
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
             <button class="primary" id="downloadBtn" onclick="downloadImage()" disabled>Download</button>
             <button class="ghost" id="resetBtn" type="button">Reset</button>
@@ -217,6 +239,7 @@
             Canvas: <span id="currentCanvas">1920×1080</span>
           </div>
         </div>
+
         <div class="canvas-wrap">
           <canvas id="canvas" width="1280" height="720"></canvas>
         </div>
@@ -225,11 +248,25 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+      let userChangedTextSize = false;
+      let currentTextSize = 40;
+      let targetTextSize = 40;
+      
         const sliders = [
           { id: "pixelCount", valueEl: "pixelCountValue" },
-          { id: "opacity", valueEl: "opacityValue" },
-          { id: "textSize", valueEl: "textSizeValue" },
+          { id: "pixelHeight", valueEl: "pixelHeightValue" },
+          { id: "opacityPixels", valueEl: "opacityPixelsValue" },
+          { id: "opacityText", valueEl: "opacityTextValue" },
+          { id: "textSize", valueEl: "textSizeValue" }
         ];
+
+        const textSizeSlider = document.getElementById("textSize");
+        if (textSizeSlider) {
+          textSizeSlider.addEventListener("input", () => {
+            userChangedTextSize = true;
+          });
+        }
+        
         function updateSliderBackground(slider) {
           const min = Number(slider.min || 0);
           const max = Number(slider.max || 100);
@@ -237,43 +274,117 @@
           const pct = ((val - min) / (max - min)) * 100;
           slider.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d9d9d9 ${pct}%)`;
         }
-        sliders.forEach((s) => {
-          const slider = document.getElementById(s.id);
-          const valueEl = document.getElementById(s.valueEl);
-          if (!slider || !valueEl) return;
-          valueEl.textContent = slider.value;
-          slider.addEventListener("input", () => {
-            valueEl.textContent = slider.value;
-            updateSliderBackground(slider);
-            if (typeof generateImage === "function") generateImage();
-          });
-          updateSliderBackground(slider);
-        });
+
+		const fontSelect = document.getElementById('fontStyle');
+		if (fontSelect) {
+		  fontSelect.addEventListener('change', () => {
+		    const fontStyle = getFontStyle();
+		    const fontSpec = `${fontStyle.style} ${fontStyle.weight} 40px "${fontStyle.family}"`;
+		    document.fonts.load(fontSpec).then(() => generateImage());
+		  });
+		}
+		
+		sliders.forEach((s) => {
+		  const slider = document.getElementById(s.id);
+		  const valueEl = document.getElementById(s.valueEl);
+		  if (!slider || !valueEl) return;
+		
+		  valueEl.textContent = slider.value;
+		  updateSliderBackground(slider);
+		
+		  slider.addEventListener("input", () => {
+		    valueEl.textContent = slider.value;
+		    updateSliderBackground(slider);
+		
+			if (s.id === "pixelCount" && !userChangedTextSize) {
+			    const pixelSliderVal = parseInt(slider.value, 10);
+			    const basePixels = 9;
+			    const baseTextSize = 40;
+			    const scaleFactor = 2.5;
+			    targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
+			    targetTextSize = Math.max(10, Math.min(200, targetTextSize));
+			    requestAnimationFrame(animateTextSize);
+			}
+		
+		    if (typeof generateImage === "function") generateImage();
+		  });
+		});
+
+		let animationRunning = false;
+		
+		function animateTextSize() {
+		  if(animationRunning) return;
+		  animationRunning = true;
+		
+		  function step() {
+		    const textSizeSlider = document.getElementById('textSize');
+		    const textSizeValue = document.getElementById('textSizeValue');
+		    const ease = 0.1;
+		    currentTextSize += (targetTextSize - currentTextSize) * ease;
+		
+		    if (textSizeSlider && textSizeValue) {
+		      textSizeSlider.value = Math.round(currentTextSize);
+		      textSizeValue.textContent = Math.round(currentTextSize);
+		      updateSliderBackground(textSizeSlider);
+		    }
+		
+		    if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
+		      requestAnimationFrame(step);
+		    } else {
+		      currentTextSize = targetTextSize;
+		      animationRunning = false;
+		    }
+		
+		    if (typeof generateImage === "function") generateImage();
+		  }
+		
+		  step();
+		}
+		
         const resetBtn = document.getElementById("resetBtn");
         if (resetBtn) {
           resetBtn.addEventListener("click", () => {
             document.getElementById("canvasWidth").value = 1920;
             document.getElementById("canvasHeight").value = 1080;
+
             const p = document.getElementById("pixelCount");
             if (p) { p.value = 9; document.getElementById("pixelCountValue").textContent = 9; updateSliderBackground(p); }
-            const o = document.getElementById("opacity");
-            if (o) { o.value = 100; document.getElementById("opacityValue").textContent = 100; updateSliderBackground(o); }
+
+            const ph = document.getElementById("pixelHeight");
+            if (ph) { ph.value = 8; document.getElementById("pixelHeightValue").textContent = 8; updateSliderBackground(ph); }
+
+            const op = document.getElementById("opacityPixels");
+            if (op) { op.value = 100; document.getElementById("opacityPixelsValue").textContent = 100; updateSliderBackground(op); }
+
+            const ot = document.getElementById("opacityText");
+            if (ot) { ot.value = 100; document.getElementById("opacityTextValue").textContent = 100; updateSliderBackground(ot); }
+
             const t = document.getElementById("textSize");
             if (t) { t.value = 40; document.getElementById("textSizeValue").textContent = 40; updateSliderBackground(t); }
+
+            const fontSelect = document.getElementById("fontStyle");
+            if (fontSelect) { fontSelect.value = "Inter-400"; }
+            
             const c1 = document.getElementById("colour1"); if (c1) c1.value = "#ffb0c5";
             const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
             const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
+
             if (typeof generateImage === "function") generateImage();
+            userChangedTextSize = false;
           });
         }
-        function updateCanvasLabel() {
-          const w = document.getElementById("canvasWidth").value || "0";
-          const h = document.getElementById("canvasHeight").value || "0";
-          const el = document.getElementById("currentCanvas");
-          if (el) el.textContent = w + "×" + h;
-        }
+
+		function updateCanvasLabel() {
+		  const w = document.getElementById("canvasWidth").value || "0";
+		  const h = document.getElementById("canvasHeight").value || "0";
+		  const el = document.getElementById("currentCanvas");
+		  if (el) el.textContent = w + "×" + h;
+		  if (typeof generateImage === "function") generateImage();
+		}
+
         ["canvasWidth","canvasHeight"].forEach((id) => document.getElementById(id).addEventListener("input", updateCanvasLabel));
         updateCanvasLabel();
+
         const colorPairs = [
           { txt: "colour1Text", pick: "colour1" },
           { txt: "colour2Text", pick: "colour2" },
@@ -283,16 +394,127 @@
           const t = document.getElementById(txt);
           const p = document.getElementById(pick);
           if (!t || !p) return;
+
           t.value = p.value.toUpperCase();
+
           t.addEventListener("input", (e) => {
             const val = e.target.value.trim();
-            if (/^#[0-9A-Fa-f]{6}$/.test(val)) { p.value = val; if (typeof generateImage === "function") generateImage(); }
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+              p.value = val;
+              if (typeof generateImage === "function") generateImage();
+            }
           });
-          p.addEventListener("input", () => { t.value = p.value.toUpperCase(); if (typeof generateImage === "function") generateImage(); });
-        });
-      });
-    </script>
 
-    <script src="genScript.js"></script>
+          p.addEventListener("input", () => {
+            t.value = p.value.toUpperCase();
+            if (typeof generateImage === "function") generateImage();
+          });
+        });
+
+        if (typeof generateImage === "function") generateImage();
+      });
+
+      function updateSliderBackground(slider) {
+        const value = ((slider.value - slider.min)/(slider.max - slider.min))*100;
+        slider.style.backgroundSize = value + '% 100%';
+      }
+
+      function getFontStyle() {
+        const fontSelect = document.getElementById('fontStyle');
+        if (!fontSelect) { return { family:'Consolas', weight:'400', style:'normal' }; }
+        const [fontFamily, weightStyle] = fontSelect.value.split('-');
+        let weight = '400';
+        let style = 'normal';
+        if (weightStyle && weightStyle.endsWith('i')) { weight = weightStyle.slice(0,-1); style='italic'; }
+        else if (weightStyle) weight = weightStyle;
+        return { family: fontFamily, weight: weight, style: style };
+      }
+
+      function generateImage() {
+        var canvasWidth = parseInt(document.getElementById('canvasWidth').value,10);
+        var canvasHeight = parseInt(document.getElementById('canvasHeight').value,10);
+        var pixels = parseInt(document.getElementById('pixelCount').value,10);
+        var color1 = (document.getElementById('colour1')||{}).value || '#ffb0c5';
+        var color2 = (document.getElementById('colour2')||{}).value || '#99cdf0';
+        var colorText = (document.getElementById('colourText')||{}).value || 'black';
+        var opacityPixels = parseInt((document.getElementById('opacityPixels')||{}).value,10);
+        if (isNaN(opacityPixels)) opacityPixels = 100;
+        var opacityText = parseInt((document.getElementById('opacityText')||{}).value,10);
+        if (isNaN(opacityText)) opacityText = 100;
+        var pixelHeightPct = parseInt((document.getElementById('pixelHeight')||{}).value,10) || 8;
+        const fontStyle = getFontStyle();
+
+        const c1Text = document.getElementById('colour1Text');
+        const c2Text = document.getElementById('colour2Text');
+        const cTextText = document.getElementById('colourTextText');
+        if (c1Text) c1Text.value = color1.toUpperCase();
+        if (c2Text) c2Text.value = color2.toUpperCase();
+        if (cTextText) cTextText.value = colorText.toUpperCase();
+
+        var canvas = document.getElementById('canvas');
+        if (!canvas) return;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        var ctx = canvas.getContext('2d');
+        if (canvasWidth<=0||canvasHeight<=0) return;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 0;
+        ctx.fillStyle='white';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 1;
+
+        const pixelWidth = canvasWidth/60;
+        const pixelHeight = Math.max(1, Math.round((canvasHeight * pixelHeightPct)/100));
+        const pixelY = Math.round(canvasHeight/2 - pixelHeight/2);
+
+        const textSizePercent = (parseInt((document.getElementById('textSize')||{}).value,10)||100)/100;
+        let desiredFontSize = pixelHeight * textSizePercent;
+        function setFont(size){ ctx.font = `${fontStyle.style} ${fontStyle.weight} ${size}px "${fontStyle.family}"`; }
+
+        const sampleText = Math.max(Math.abs(pixels),1).toString();
+        setFont(desiredFontSize);
+        let textWidth = ctx.measureText(sampleText).width;
+        const maxAllowedWidth = Math.max(pixelWidth-10,6);
+        const fontSize = Math.max(1,Math.floor(desiredFontSize));
+        setFont(fontSize);
+
+        for(let i=-pixels;i<pixels;i++){
+          var pixelX = canvasWidth/2 + i*pixelWidth;
+          ctx.globalAlpha = opacityPixels/100;
+          ctx.fillStyle = (Math.abs(i%2)===1) ? color2 : color1;
+          ctx.fillRect(pixelX, pixelY, pixelWidth, pixelHeight);
+
+          var num = i<0?Math.abs(i):i+1;
+          ctx.globalAlpha = opacityText/100;
+          setFont(fontSize);
+          ctx.fillStyle = colorText;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(num, pixelX + pixelWidth/2, pixelY + pixelHeight/2);
+        }
+
+        ctx.globalAlpha = 1;
+
+        var crosshairWidth = 0.003125*canvasWidth;
+        var crosshairHeight = canvasHeight;
+        var crosshairX = canvasWidth/2 - crosshairWidth;
+        var crosshairY = 0;
+        ctx.fillStyle = '#e8e8e8';
+        ctx.fillRect(crosshairX, crosshairY, crosshairWidth, crosshairHeight);
+
+        const dl = document.getElementById('downloadBtn');
+        if(dl) dl.disabled = false;
+      }
+
+      function downloadImage() {
+        var canvas = document.getElementById('canvas');
+        if(!canvas) return;
+        var link = document.createElement('a');
+        link.href = canvas.toDataURL();
+        link.download = 'overlay.png';
+        link.click();
+      }
+    </script>
   </body>
 </html>
