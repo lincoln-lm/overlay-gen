@@ -296,7 +296,8 @@
 		    valueEl.textContent = slider.value;
 		    updateSliderBackground(slider);
 		
-			if (!userChangedTextSize) {
+			if (!userChangedTextSize && slider.id === "pixelCount") {
+			    const pixelSliderVal = Number(slider.value); 
 			    const basePixels = 9;
 			    const baseTextSize = 40;
 			    let scaleFactor;
@@ -309,6 +310,7 @@
 			
 			    targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
 			    targetTextSize = Math.max(10, targetTextSize); 
+			    animateTextSize(); 
 			}
 
 
