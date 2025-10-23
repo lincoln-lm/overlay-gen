@@ -301,11 +301,15 @@
 			    const pixelSliderVal = parseInt(slider.value, 10);
 			    const basePixels = 9;
 			    const baseTextSize = 40;
-			    const scaleFactor = 2.5;
-			    targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
+			
+			    const exponent = 1.5; 
+			    targetTextSize = baseTextSize - Math.pow(Math.abs(pixelSliderVal - basePixels), exponent);
+			
 			    targetTextSize = Math.max(10, Math.min(200, targetTextSize));
+			
 			    requestAnimationFrame(animateTextSize);
 			}
+
 
 		
 		    if (typeof generateImage === "function") generateImage();
