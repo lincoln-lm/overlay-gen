@@ -296,23 +296,23 @@
 		    valueEl.textContent = slider.value;
 		    updateSliderBackground(slider);
 		
-			if (!userChangedTextSize && slider.id === "pixelCount") {
-			    const pixelSliderVal = Number(slider.value); 
-			    const minTextSize = 10; 
+			if (slider.id === "pixelCount") {
+			    const pixelSliderVal = Number(slider.value);
 			
-			    if (pixelSliderVal <= 9) {
+			    if (pixelSliderVal > 19) {
+			        targetTextSize = 22;  
+			    } else if (pixelSliderVal <= 9) {
 			        targetTextSize = 40;
 			    } else if (pixelSliderVal <= 14) {
 			        targetTextSize = 28;
 			    } else {
 			        const extraPixels = pixelSliderVal - 14;
-			        targetTextSize = Math.max(minTextSize, 28 - extraPixels * 1.5);
+			        targetTextSize = Math.max(10, 28 - extraPixels * 1.5);
 			    }
 			
 			    animateTextSize();
 			}
 
-		
 		    if (typeof generateImage === "function") generateImage();
 		  });
 		});
