@@ -385,48 +385,60 @@
 	        }
 	      }
 	
-	      if (slider.id === "pixelHeight") {
-	        const pixelHeightVal = Number(slider.value); 
-	        userChangedTextSize = false;
-	
-	        const targetFromHeight = mapPixelHeightToTextSize(pixelHeightVal);
-	        targetTextSize = targetFromHeight;
-	        animateTextSize();
-	      }
+		if (slider.id === "pixelHeight") {
+		  const pixelHeightVal = Number(slider.value);
+		  // allow pixelHeight to regain control of text sizing
+		  userChangedTextSize = false;
+		
+		  // map pixel height to desired text size (your map function already)
+		  const targetFromHeight = mapPixelHeightToTextSize(pixelHeightVal);
+		
+		  // set target and animate
+		  targetTextSize = targetFromHeight;
+		  animateTextSize();
+		}
+
 	
 	      if (typeof generateImage === "function") generateImage();
 	    });
 	  });
 	
-	  let animationRunning = false;
-	  function animateTextSize() {
-	    if (animationRunning) return;
-	    animationRunning = true;
+	let animationRunning = false;
+	function animateTextSize() {
+	  if (animationRunning) return;
+	  animationRunning = true;
 	
-	    function step() {
-	      const textSizeSlider = document.getElementById('textSize');
-	      const textSizeValue = document.getElementById('textSizeValue');
-	      const ease = 0.12;
-	      currentTextSize += (targetTextSize - currentTextSize) * ease;
+	  const textSizeSlider = document.getElementById('textSize');
+	  const textSizeValue = document.getElementById('textSizeValue');
+	  const ease = 0.12;
 	
-	      if (textSizeSlider && textSizeValue) {
-	        textSizeSlider.value = Math.round(currentTextSize);
-	        textSizeValue.textContent = Math.round(currentTextSize);
-	        updateSliderBackground(textSizeSlider);
-	      }
+	  function step() {
+	    currentTextSize += (targetTextSize - currentTextSize) * ease;
 	
-	      if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
-	        requestAnimationFrame(step);
-	      } else {
-	        currentTextSize = targetTextSize;
-	        animationRunning = false;
-	      }
-	
-	      if (typeof generateImage === "function") generateImage();
+	    if (textSizeSlider && textSizeValue) {
+	      textSizeSlider.value = Math.round(currentTextSize);
+	      textSizeValue.textContent = Math.round(currentTextSize);
+	      updateSliderBackground(textSizeSlider);
 	    }
 	
-	    step();
+	    if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
+	      if (typeof generateImage === "function") generateImage();
+	      requestAnimationFrame(step);
+	    } else {
+	      currentTextSize = targetTextSize;
+	      if (textSizeSlider && textSizeValue) {
+	        textSizeSlider.value = Math.round(targetTextSize);
+	        textSizeValue.textContent = Math.round(targetTextSize);
+	        updateSliderBackground(textSizeSlider);
+	      }
+	      if (typeof generateImage === "function") generateImage();
+	
+	      animationRunning = false;
+	    }
 	  }
+	
+	  step();
+	}
 	
 	  const resetBtn = document.getElementById("resetBtn");
 	  if (resetBtn) {
