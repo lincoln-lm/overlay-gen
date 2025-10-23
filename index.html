@@ -298,21 +298,19 @@
 		
 			if (!userChangedTextSize && slider.id === "pixelCount") {
 			    const pixelSliderVal = Number(slider.value); 
-			    const holdPixels = 14;  
-			    const baseTextSize = 40; 
 			    const minTextSize = 10; 
 			
-			    if (pixelSliderVal <= holdPixels) {
-			        targetTextSize = baseTextSize;
+			    if (pixelSliderVal <= 9) {
+			        targetTextSize = 40;
+			    } else if (pixelSliderVal <= 14) {
+			        targetTextSize = 28;
 			    } else {
-			        const extraPixels = pixelSliderVal - holdPixels;
-			        targetTextSize = Math.max(minTextSize, baseTextSize - extraPixels * 1.2); 
+			        const extraPixels = pixelSliderVal - 14;
+			        targetTextSize = Math.max(minTextSize, 28 - extraPixels * 1.5);
 			    }
 			
 			    animateTextSize();
 			}
-
-
 
 		
 		    if (typeof generateImage === "function") generateImage();
