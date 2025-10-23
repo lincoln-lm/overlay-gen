@@ -299,17 +299,19 @@
 			if (s.id === "pixelCount") {
 			    userChangedTextSize = false; 
 			    const pixelSliderVal = parseInt(slider.value, 10);
-			    const basePixels = 9;
-			    const baseTextSize = 40;
+			    const minPixels = 1;
+			    const maxPixels = 50;
+			    const minText = 10;  
+			    const maxText = 200; 
 			
-			    const exponent = 2.5; 
-			    targetTextSize = baseTextSize - Math.pow(Math.abs(pixelSliderVal - basePixels), exponent);
+			    const normalized = (pixelSliderVal - minPixels) / (maxPixels - minPixels); // 0..1
+			    const curve = Math.pow(normalized, 0.5); 
+			    targetTextSize = maxText - (maxText - minText) * curve;
 			
-			    targetTextSize = Math.max(10, Math.min(200, targetTextSize));
+			    targetTextSize = Math.max(minText, Math.min(maxText, targetTextSize));
 			
 			    requestAnimationFrame(animateTextSize);
 			}
-
 
 		
 		    if (typeof generateImage === "function") generateImage();
