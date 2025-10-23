@@ -304,355 +304,335 @@
       </main>
     </div>
 
-	<script>
-	document.addEventListener("DOMContentLoaded", () => {
-	  let userChangedTextSize = false;
-	  let currentTextSize = 40;
-	  let targetTextSize = 40;
-	
-	  const sliders = [
-	    { id: "pixelCount", valueEl: "pixelCountValue" },
-	    { id: "pixelHeight", valueEl: "pixelHeightValue" },
-	    { id: "opacityPixels", valueEl: "opacityPixelsValue" },
-	    { id: "opacityText", valueEl: "opacityTextValue" },
-	    { id: "textSize", valueEl: "textSizeValue" }
-	  ];
-	
-	  const textSizeSlider = document.getElementById("textSize");
-	  if (textSizeSlider) {
-	    textSizeSlider.addEventListener("input", () => {
-	      userChangedTextSize = true;
-	    });
-	  }
-	
-	  function updateSliderBackground(slider) {
-	    const min = Number(slider.min || 0);
-	    const max = Number(slider.max || 100);
-	    const val = Number(slider.value || 0);
-	    const pct = ((val - min) / (max - min)) * 100;
-	    slider.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d9d9d9 ${pct}%)`;
-	  }
-	
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+      let userChangedTextSize = false;
+      let currentTextSize = 40;
+      let targetTextSize = 40;
+      
+        const sliders = [
+          { id: "pixelCount", valueEl: "pixelCountValue" },
+          { id: "pixelHeight", valueEl: "pixelHeightValue" },
+          { id: "opacityPixels", valueEl: "opacityPixelsValue" },
+          { id: "opacityText", valueEl: "opacityTextValue" },
+          { id: "textSize", valueEl: "textSizeValue" }
+        ];
 
-	  function mapPixelHeightToTextSize(h) {
-	    if (h > 8) return 40;
-	    if (h <= 2) return 85;
-	    const points = [
-	      { h: 8, t: 40 },
-	      { h: 7, t: 50 },
-	      { h: 5, t: 70 },
-	      { h: 2, t: 85 }
-	    ];
-	    // find segment h is in
-	    for (let i = 0; i < points.length - 1; i++) {
-	      const a = points[i];
-	      const b = points[i + 1];
-	      if (h <= a.h && h >= b.h) {
-	        const t = a.t + (h - a.h) * (b.t - a.t) / (b.h - a.h);
-	        return Math.round(t);
-	      }
-	    }
-	    return 40;
-	  }
-	
-	  sliders.forEach((s) => {
-	    const slider = document.getElementById(s.id);
-	    const valueEl = document.getElementById(s.valueEl);
-	    if (!slider || !valueEl) return;
-	
-	    valueEl.textContent = slider.value;
-	    updateSliderBackground(slider);
-	
-	    slider.addEventListener("input", () => {
-	      valueEl.textContent = slider.value;
-	      updateSliderBackground(slider);
-	
-	      if (slider.id === "pixelCount") {
-	        const pixelSliderVal = Number(slider.value);
-	
-	        if (!userChangedTextSize) {
-	          if (pixelSliderVal > 19) {
-	            targetTextSize = 22;
-	          } else if (pixelSliderVal <= 9) {
-	            targetTextSize = 40;
-	          } else if (pixelSliderVal <= 14) {
-	            targetTextSize = 28;
-	          } else {
-	            const extraPixels = pixelSliderVal - 14;
-	            targetTextSize = Math.max(10, 28 - extraPixels * 1.5);
-	          }
-	          animateTextSize();
-	        }
-	      }
-	
-		if (slider.id === "pixelHeight") {
-		  const pixelHeightVal = Number(slider.value);
-		  // allow pixelHeight to regain control of text sizing
-		  userChangedTextSize = false;
+        const textSizeSlider = document.getElementById("textSize");
+        if (textSizeSlider) {
+          textSizeSlider.addEventListener("input", () => {
+            userChangedTextSize = true;
+          });
+        }
+        
+        function updateSliderBackground(slider) {
+          const min = Number(slider.min || 0);
+          const max = Number(slider.max || 100);
+          const val = Number(slider.value || 0);
+          const pct = ((val - min) / (max - min)) * 100;
+          slider.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d9d9d9 ${pct}%)`;
+        }
+
+		const fontSelect = document.getElementById('fontStyle');
+		if (fontSelect) {
+		  fontSelect.addEventListener('change', () => {
+		    const fontStyle = getFontStyle();
+		    const fontSpec = `${fontStyle.style} ${fontStyle.weight} 40px "${fontStyle.family}"`;
+		    document.fonts.load(fontSpec).then(() => generateImage());
+		  });
+		}
 		
-		  // map pixel height to desired text size (your map function already)
-		  const targetFromHeight = mapPixelHeightToTextSize(pixelHeightVal);
+		sliders.forEach((s) => {
+		  const slider = document.getElementById(s.id);
+		  const valueEl = document.getElementById(s.valueEl);
+		  if (!slider || !valueEl) return;
 		
-		  // set target and animate
-		  targetTextSize = targetFromHeight;
-		  animateTextSize();
+		  valueEl.textContent = slider.value;
+		  updateSliderBackground(slider);
+		
+		  slider.addEventListener("input", () => {
+		    valueEl.textContent = slider.value;
+		    updateSliderBackground(slider);
+		
+		    if (slider.id === "pixelCount") {
+		      const pixelSliderVal = Number(slider.value);
+		
+		      if (!userChangedTextSize) {
+		        if (pixelSliderVal > 19) {
+		          targetTextSize = 22;
+		        } else if (pixelSliderVal <= 9) {
+		          targetTextSize = 40;
+		        } else if (pixelSliderVal <= 14) {
+		          targetTextSize = 28;
+		        } else {
+		          const extraPixels = pixelSliderVal - 14;
+		          targetTextSize = Math.max(10, 28 - extraPixels * 1.5);
+		        }
+		        animateTextSize();
+		      }
+		    }
+		
+		    if (slider.id === "pixelHeight") {
+		      const pixelHeightVal = Number(slider.value); 
+
+		      let targetFromHeight = 40;
+		      if (pixelHeightVal <= 8) {
+		        targetFromHeight = 40 + (8 - pixelHeightVal) * 8; 
+		        if (targetFromHeight > 100) targetFromHeight = 100;
+		      }
+		
+		      if (!userChangedTextSize) {
+		        targetTextSize = Math.max(targetTextSize, Math.round(targetFromHeight));
+		        animateTextSize();
+		      }
+		    }
+		
+		    if (typeof generateImage === "function") generateImage();
+		  });
+		});
+
+
+		let animationRunning = false;
+		
+		function animateTextSize() {
+		  if(animationRunning) return;
+		  animationRunning = true;
+		
+		  function step() {
+		    const textSizeSlider = document.getElementById('textSize');
+		    const textSizeValue = document.getElementById('textSizeValue');
+		    const ease = 0.1;
+		    currentTextSize += (targetTextSize - currentTextSize) * ease;
+		
+		    if (textSizeSlider && textSizeValue) {
+		      textSizeSlider.value = Math.round(currentTextSize);
+		      textSizeValue.textContent = Math.round(currentTextSize);
+		      updateSliderBackground(textSizeSlider);
+		    }
+		
+		    if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
+		      requestAnimationFrame(step);
+		    } else {
+		      currentTextSize = targetTextSize;
+		      animationRunning = false;
+		    }
+		
+		    if (typeof generateImage === "function") generateImage();
+		  }
+		
+		  step();
+		}
+		
+        const resetBtn = document.getElementById("resetBtn");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            document.getElementById("canvasWidth").value = 1920;
+            document.getElementById("canvasHeight").value = 1080;
+
+            const p = document.getElementById("pixelCount");
+            if (p) { p.value = 9; document.getElementById("pixelCountValue").textContent = 9; updateSliderBackground(p); }
+
+            const ph = document.getElementById("pixelHeight");
+            if (ph) { ph.value = 8; document.getElementById("pixelHeightValue").textContent = 8; updateSliderBackground(ph); }
+
+            const op = document.getElementById("opacityPixels");
+            if (op) { op.value = 100; document.getElementById("opacityPixelsValue").textContent = 100; updateSliderBackground(op); }
+
+            const ot = document.getElementById("opacityText");
+            if (ot) { ot.value = 100; document.getElementById("opacityTextValue").textContent = 100; updateSliderBackground(ot); }
+
+            const t = document.getElementById("textSize");
+            if (t) { t.value = 40; document.getElementById("textSizeValue").textContent = 40; updateSliderBackground(t); }
+
+            const fontSelect = document.getElementById("fontStyle");
+            if (fontSelect) { fontSelect.value = "Inter-400"; }
+            
+            const c1 = document.getElementById("colour1"); if (c1) c1.value = "#ffb0c5";
+            const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
+            const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
+
+            if (typeof generateImage === "function") generateImage();
+            userChangedTextSize = false;
+          });
+        }
+
+		function updateCanvasLabel() {
+		  const w = document.getElementById("canvasWidth").value || "0";
+		  const h = document.getElementById("canvasHeight").value || "0";
+		  const el = document.getElementById("currentCanvas");
+		  if (el) el.textContent = w + "×" + h;
+		  if (typeof generateImage === "function") generateImage();
 		}
 
-	
-	      if (typeof generateImage === "function") generateImage();
-	    });
-	  });
-	
-	let animationRunning = false;
-	function animateTextSize() {
-	  if (animationRunning) return;
-	  animationRunning = true;
-	
-	  const textSizeSlider = document.getElementById('textSize');
-	  const textSizeValue = document.getElementById('textSizeValue');
-	  const ease = 0.12;
-	
-	  function step() {
-	    currentTextSize += (targetTextSize - currentTextSize) * ease;
-	
-	    if (textSizeSlider && textSizeValue) {
-	      textSizeSlider.value = Math.round(currentTextSize);
-	      textSizeValue.textContent = Math.round(currentTextSize);
-	      updateSliderBackground(textSizeSlider);
-	    }
-	
-	    if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
-	      if (typeof generateImage === "function") generateImage();
-	      requestAnimationFrame(step);
-	    } else {
-	      currentTextSize = targetTextSize;
-	      if (textSizeSlider && textSizeValue) {
-	        textSizeSlider.value = Math.round(targetTextSize);
-	        textSizeValue.textContent = Math.round(targetTextSize);
-	        updateSliderBackground(textSizeSlider);
-	      }
-	      if (typeof generateImage === "function") generateImage();
-	
-	      animationRunning = false;
-	    }
-	  }
-	
-	  step();
-	}
-	
-	  const resetBtn = document.getElementById("resetBtn");
-	  if (resetBtn) {
-	    resetBtn.addEventListener("click", () => {
-	      document.getElementById("canvasWidth").value = 1920;
-	      document.getElementById("canvasHeight").value = 1080;
-	
-	      const p = document.getElementById("pixelCount");
-	      if (p) { p.value = 9; document.getElementById("pixelCountValue").textContent = 9; updateSliderBackground(p); }
-	
-	      const ph = document.getElementById("pixelHeight");
-	      if (ph) { ph.value = 8; document.getElementById("pixelHeightValue").textContent = 8; updateSliderBackground(ph); }
-	
-	      const op = document.getElementById("opacityPixels");
-	      if (op) { op.value = 100; document.getElementById("opacityPixelsValue").textContent = 100; updateSliderBackground(op); }
-	
-	      const ot = document.getElementById("opacityText");
-	      if (ot) { ot.value = 100; document.getElementById("opacityTextValue").textContent = 100; updateSliderBackground(ot); }
-	
-	      const t = document.getElementById("textSize");
-	      if (t) { t.value = 40; document.getElementById("textSizeValue").textContent = 40; updateSliderBackground(t); }
-	
-	      const fontSelect = document.getElementById("fontStyle");
-	      if (fontSelect) { fontSelect.value = "Inter-400"; }
-	
-	      const c1 = document.getElementById("colour1"); if (c1) c1.value = "#ffb0c5";
-	      const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
-	      const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
-	
-	      if (typeof generateImage === "function") generateImage();
-	      userChangedTextSize = false;
-	    });
-	  }
-	
-	  function updateCanvasLabel() {
-	    const w = document.getElementById("canvasWidth").value || "0";
-	    const h = document.getElementById("canvasHeight").value || "0";
-	    const el = document.getElementById("currentCanvas");
-	    if (el) el.textContent = w + "×" + h;
-	    if (typeof generateImage === "function") generateImage();
-	  }
-	  ["canvasWidth","canvasHeight"].forEach((id) => document.getElementById(id).addEventListener("input", updateCanvasLabel));
-	  updateCanvasLabel();
-	
-	  const colorPairs = [
-	    { txt: "colour1Text", pick: "colour1" },
-	    { txt: "colour2Text", pick: "colour2" },
-	    { txt: "colourTextText", pick: "colourText" },
-	  ];
-	  colorPairs.forEach(({ txt, pick }) => {
-	    const t = document.getElementById(txt);
-	    const p = document.getElementById(pick);
-	    if (!t || !p) return;
-	    t.value = p.value.toUpperCase();
-	    t.addEventListener("input", (e) => {
-	      const val = e.target.value.trim();
-	      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-	        p.value = val;
-	        if (typeof generateImage === "function") generateImage();
-	      }
-	    });
-	    p.addEventListener("input", () => {
-	      t.value = p.value.toUpperCase();
-	      if (typeof generateImage === "function") generateImage();
-	    });
-	  });
-	
-	  if (typeof generateImage === "function") generateImage();
-	});
-	
-	function updateSliderBackground(slider) {
-	  const value = ((slider.value - slider.min)/(slider.max - slider.min))*100;
-	  slider.style.backgroundSize = value + '% 100%';
-	}
-	
-	function getFontStyle() {
-	  const fontSelect = document.getElementById('fontStyle');
-	  if (!fontSelect) { return { family:'Consolas', weight:'400', style:'normal' }; }
-	  const [fontFamily, weightStyle] = fontSelect.value.split('-');
-	  let weight = '400';
-	  let style = 'normal';
-	  if (weightStyle && weightStyle.endsWith('i')) { weight = weightStyle.slice(0,-1); style='italic'; }
-	  else if (weightStyle) weight = weightStyle;
-	  return { family: fontFamily, weight: weight, style: style };
-	}
-	
-	function generateImage() {
-	  var canvasWidth = parseInt(document.getElementById('canvasWidth').value,10);
-	  var canvasHeight = parseInt(document.getElementById('canvasHeight').value,10);
-	  var pixels = parseInt(document.getElementById('pixelCount').value,10);
-	  var color1 = (document.getElementById('colour1')||{}).value || '#ffb0c5';
-	  var color2 = (document.getElementById('colour2')||{}).value || '#99cdf0';
-	  var colorText = (document.getElementById('colourText')||{}).value || 'black';
-	  var opacityPixels = parseInt((document.getElementById('opacityPixels')||{}).value,10);
-	  if (isNaN(opacityPixels)) opacityPixels = 100;
-	  var opacityText = parseInt((document.getElementById('opacityText')||{}).value,10);
-	  if (isNaN(opacityText)) opacityText = 100;
-	  var pixelHeightPct = parseInt((document.getElementById('pixelHeight')||{}).value,10) || 8;
-	  const fontStyle = getFontStyle();
-	
-	  const c1Text = document.getElementById('colour1Text');
-	  const c2Text = document.getElementById('colour2Text');
-	  const cTextText = document.getElementById('colourTextText');
-	  if (c1Text) c1Text.value = color1.toUpperCase();
-	  if (c2Text) c2Text.value = color2.toUpperCase();
-	  if (cTextText) cTextText.value = colorText.toUpperCase();
-	
-	  var canvas = document.getElementById('canvas');
-	  if (!canvas) return;
-	  canvas.width = canvasWidth;
-	  canvas.height = canvasHeight;
-	  var ctx = canvas.getContext('2d');
-	  if (canvasWidth<=0||canvasHeight<=0) return;
-	
-	  ctx.clearRect(0,0,canvas.width,canvas.height);
-	  ctx.globalAlpha = 0;
-	  ctx.fillStyle='white';
-	  ctx.fillRect(0,0,canvas.width,canvas.height);
-	  ctx.globalAlpha = 1;
-	
-	  const pixelWidth = canvasWidth/60;
-	  const pixelHeight = Math.max(1, Math.round((canvasHeight * pixelHeightPct)/100));
-	  const pixelY = Math.round(canvasHeight/2 - pixelHeight/2);
-	
-	  const textSizePercent = (parseInt((document.getElementById('textSize')||{}).value,10)||100)/100;
-	
-	  let desiredFontSize = Math.floor(pixelHeight * textSizePercent);
-	  if (desiredFontSize > pixelHeight) desiredFontSize = pixelHeight;
-	
-	  function setFont(size){ ctx.font = `${fontStyle.style} ${fontStyle.weight} ${size}px "${fontStyle.family}"`; }
-	
-	  const sampleText = Math.max(Math.abs(pixels),1).toString();
-	  setFont(desiredFontSize);
-	  let textWidth = ctx.measureText(sampleText).width;
-	  const maxAllowedWidth = Math.max(pixelWidth-10,6);
-	
-	  while (textWidth > maxAllowedWidth && desiredFontSize > 1) {
-	    desiredFontSize--;
-	    setFont(desiredFontSize);
-	    textWidth = ctx.measureText(sampleText).width;
-	  }
-	  const fontSize = Math.max(1, Math.floor(desiredFontSize));
-	  setFont(fontSize);
-	
-	  for(let i=-pixels;i<pixels;i++){
-	    var pixelX = canvasWidth/2 + i*pixelWidth;
-	    ctx.globalAlpha = opacityPixels/100;
-	    ctx.fillStyle = (Math.abs(i%2)===1) ? color2 : color1;
-	    ctx.fillRect(pixelX, pixelY, pixelWidth, pixelHeight);
-	
-	    var num = i<0?Math.abs(i):i+1;
-	    ctx.globalAlpha = opacityText/100;
-	    setFont(fontSize);
-	    ctx.fillStyle = colorText;
-	    ctx.textAlign = 'center';
-	    ctx.textBaseline = 'middle';
-	    ctx.fillText(num, pixelX + pixelWidth/2, pixelY + pixelHeight/2);
-	  }
-	
-	  ctx.globalAlpha = 1;
-	
-	  var crosshairWidth = 0.003125*canvasWidth;
-	  var crosshairHeight = canvasHeight;
-	  var crosshairX = canvasWidth/2 - crosshairWidth;
-	  var crosshairY = 0;
-	  ctx.fillStyle = '#e8e8e8';
-	  ctx.fillRect(crosshairX, crosshairY, crosshairWidth, crosshairHeight);
-	
-	  const dl = document.getElementById('downloadBtn');
-	  if(dl) dl.disabled = false;
-	
-	  const CENTER_WIDTH = 60;
-	  const CENTER_HEIGHT = 580;
-	
-	  const left = Math.max(0, Math.round((canvasWidth - CENTER_WIDTH) / 2));
-	  const right = left; // symmetric
-	  const top = Math.max(0, Math.round((canvasHeight - CENTER_HEIGHT) / 2));
-	  const bottom = top; // symmetric
-	
-	  const hEl = document.getElementById('cropHorizontal');
-	  const vEl = document.getElementById('cropVertical');
-	
-	  if (hEl) hEl.textContent = `Left: ${left} Right: ${right}`;
-	  if (vEl) vEl.textContent = `Top: ${top} Bottom: ${bottom}`;
-	}
-	
-	function downloadImage() {
-	  var canvas = document.getElementById('canvas');
-	  if(!canvas) return;
-	  var link = document.createElement('a');
-	  link.href = canvas.toDataURL();
-	  link.download = 'overlay.png';
-	  link.click();
-	}
-	
-	const toggleBtn = document.getElementById('toggleTransformBtn');
-	const transformModal = document.getElementById('transformModal');
-	const closeModal = document.getElementById('closeModal');
-	
-	if (toggleBtn && transformModal) {
-	  toggleBtn.addEventListener('click', () => {
-	    transformModal.style.display = 'flex';
-	  });
-	}
-	if (closeModal && transformModal) {
-	  closeModal.addEventListener('click', () => {
-	    transformModal.style.display = 'none';
-	  });
-	}
-	if (transformModal) {
-	  transformModal.addEventListener('click', (e) => {
-	    if (e.target === transformModal) transformModal.style.display = 'none';
-	  });
-	}
-	</script>
+        ["canvasWidth","canvasHeight"].forEach((id) => document.getElementById(id).addEventListener("input", updateCanvasLabel));
+        updateCanvasLabel();
+
+        const colorPairs = [
+          { txt: "colour1Text", pick: "colour1" },
+          { txt: "colour2Text", pick: "colour2" },
+          { txt: "colourTextText", pick: "colourText" },
+        ];
+        colorPairs.forEach(({ txt, pick }) => {
+          const t = document.getElementById(txt);
+          const p = document.getElementById(pick);
+          if (!t || !p) return;
+
+          t.value = p.value.toUpperCase();
+
+          t.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+              p.value = val;
+              if (typeof generateImage === "function") generateImage();
+            }
+          });
+
+          p.addEventListener("input", () => {
+            t.value = p.value.toUpperCase();
+            if (typeof generateImage === "function") generateImage();
+          });
+        });
+
+        if (typeof generateImage === "function") generateImage();
+      });
+
+      function updateSliderBackground(slider) {
+        const value = ((slider.value - slider.min)/(slider.max - slider.min))*100;
+        slider.style.backgroundSize = value + '% 100%';
+      }
+
+      function getFontStyle() {
+        const fontSelect = document.getElementById('fontStyle');
+        if (!fontSelect) { return { family:'Consolas', weight:'400', style:'normal' }; }
+        const [fontFamily, weightStyle] = fontSelect.value.split('-');
+        let weight = '400';
+        let style = 'normal';
+        if (weightStyle && weightStyle.endsWith('i')) { weight = weightStyle.slice(0,-1); style='italic'; }
+        else if (weightStyle) weight = weightStyle;
+        return { family: fontFamily, weight: weight, style: style };
+      }
+
+      function generateImage() {
+        var canvasWidth = parseInt(document.getElementById('canvasWidth').value,10);
+        var canvasHeight = parseInt(document.getElementById('canvasHeight').value,10);
+        var pixels = parseInt(document.getElementById('pixelCount').value,10);
+        var color1 = (document.getElementById('colour1')||{}).value || '#ffb0c5';
+        var color2 = (document.getElementById('colour2')||{}).value || '#99cdf0';
+        var colorText = (document.getElementById('colourText')||{}).value || 'black';
+        var opacityPixels = parseInt((document.getElementById('opacityPixels')||{}).value,10);
+        if (isNaN(opacityPixels)) opacityPixels = 100;
+        var opacityText = parseInt((document.getElementById('opacityText')||{}).value,10);
+        if (isNaN(opacityText)) opacityText = 100;
+        var pixelHeightPct = parseInt((document.getElementById('pixelHeight')||{}).value,10) || 8;
+        const fontStyle = getFontStyle();
+
+        const c1Text = document.getElementById('colour1Text');
+        const c2Text = document.getElementById('colour2Text');
+        const cTextText = document.getElementById('colourTextText');
+        if (c1Text) c1Text.value = color1.toUpperCase();
+        if (c2Text) c2Text.value = color2.toUpperCase();
+        if (cTextText) cTextText.value = colorText.toUpperCase();
+
+        var canvas = document.getElementById('canvas');
+        if (!canvas) return;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        var ctx = canvas.getContext('2d');
+        if (canvasWidth<=0||canvasHeight<=0) return;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 0;
+        ctx.fillStyle='white';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 1;
+
+        const pixelWidth = canvasWidth/60;
+        const pixelHeight = Math.max(1, Math.round((canvasHeight * pixelHeightPct)/100));
+        const pixelY = Math.round(canvasHeight/2 - pixelHeight/2);
+
+        const textSizePercent = (parseInt((document.getElementById('textSize')||{}).value,10)||100)/100;
+        let desiredFontSize = pixelHeight * textSizePercent;
+        function setFont(size){ ctx.font = `${fontStyle.style} ${fontStyle.weight} ${size}px "${fontStyle.family}"`; }
+
+        const sampleText = Math.max(Math.abs(pixels),1).toString();
+        setFont(desiredFontSize);
+        let textWidth = ctx.measureText(sampleText).width;
+        const maxAllowedWidth = Math.max(pixelWidth-10,6);
+        const fontSize = Math.max(1,Math.floor(desiredFontSize));
+        setFont(fontSize);
+
+        for(let i=-pixels;i<pixels;i++){
+          var pixelX = canvasWidth/2 + i*pixelWidth;
+          ctx.globalAlpha = opacityPixels/100;
+          ctx.fillStyle = (Math.abs(i%2)===1) ? color2 : color1;
+          ctx.fillRect(pixelX, pixelY, pixelWidth, pixelHeight);
+
+          var num = i<0?Math.abs(i):i+1;
+          ctx.globalAlpha = opacityText/100;
+          setFont(fontSize);
+          ctx.fillStyle = colorText;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(num, pixelX + pixelWidth/2, pixelY + pixelHeight/2);
+        }
+
+        ctx.globalAlpha = 1;
+
+        var crosshairWidth = 0.003125*canvasWidth;
+        var crosshairHeight = canvasHeight;
+        var crosshairX = canvasWidth/2 - crosshairWidth;
+        var crosshairY = 0;
+        ctx.fillStyle = '#e8e8e8';
+        ctx.fillRect(crosshairX, crosshairY, crosshairWidth, crosshairHeight);
+
+        const dl = document.getElementById('downloadBtn');
+        if(dl) dl.disabled = false;
+
+
+		const CENTER_WIDTH = 60;
+		const CENTER_HEIGHT = 580;
+		
+		const left = Math.max(0, Math.round((canvasWidth - CENTER_WIDTH) / 2));
+		const right = left; // symmetric
+		const top = Math.max(0, Math.round((canvasHeight - CENTER_HEIGHT) / 2));
+		const bottom = top; // symmetric
+		
+		const hEl = document.getElementById('cropHorizontal');
+		const vEl = document.getElementById('cropVertical');
+		
+		if (hEl) hEl.textContent = `Left: ${left} Right: ${right}`;
+		if (vEl) vEl.textContent = `Top: ${top} Bottom: ${bottom}`;
+
+      }
+
+      function downloadImage() {
+        var canvas = document.getElementById('canvas');
+        if(!canvas) return;
+        var link = document.createElement('a');
+        link.href = canvas.toDataURL();
+        link.download = 'overlay.png';
+        link.click();
+      }
+
+      const toggleBtn = document.getElementById('toggleTransformBtn');
+      const transformModal = document.getElementById('transformModal');
+      const closeModal = document.getElementById('closeModal');
+
+      if (toggleBtn && transformModal) {
+        toggleBtn.addEventListener('click', () => {
+          transformModal.style.display = 'flex';
+        });
+      }
+
+      if (closeModal && transformModal) {
+        closeModal.addEventListener('click', () => {
+          transformModal.style.display = 'none';
+        });
+      }
+
+      transformModal.addEventListener('click', (e) => {
+        if (e.target === transformModal) transformModal.style.display = 'none';
+      });
+    </script>
   </body>
 </html>
