@@ -354,26 +354,43 @@
 		    valueEl.textContent = slider.value;
 		    updateSliderBackground(slider);
 		
-			if (slider.id === "pixelCount") {
-			    const pixelSliderVal = Number(slider.value);
-			
-			    if (pixelSliderVal > 19) {
-			        targetTextSize = 22;  
-			    } else if (pixelSliderVal <= 9) {
-			        targetTextSize = 40;
-			    } else if (pixelSliderVal <= 14) {
-			        targetTextSize = 28;
-			    } else {
-			        const extraPixels = pixelSliderVal - 14;
-			        targetTextSize = Math.max(10, 28 - extraPixels * 1.5);
-			    }
-			
-			    animateTextSize();
-			}
+		    if (slider.id === "pixelCount") {
+		      const pixelSliderVal = Number(slider.value);
+		
+		      if (!userChangedTextSize) {
+		        if (pixelSliderVal > 19) {
+		          targetTextSize = 22;
+		        } else if (pixelSliderVal <= 9) {
+		          targetTextSize = 40;
+		        } else if (pixelSliderVal <= 14) {
+		          targetTextSize = 28;
+		        } else {
+		          const extraPixels = pixelSliderVal - 14;
+		          targetTextSize = Math.max(10, 28 - extraPixels * 1.5);
+		        }
+		        animateTextSize();
+		      }
+		    }
+		
+		    if (slider.id === "pixelHeight") {
+		      const pixelHeightVal = Number(slider.value); 
 
+		      let targetFromHeight = 40;
+		      if (pixelHeightVal <= 8) {
+		        targetFromHeight = 40 + (8 - pixelHeightVal) * 8; 
+		        if (targetFromHeight > 100) targetFromHeight = 100;
+		      }
+		
+		      if (!userChangedTextSize) {
+		        targetTextSize = Math.max(targetTextSize, Math.round(targetFromHeight));
+		        animateTextSize();
+		      }
+		    }
+		
 		    if (typeof generateImage === "function") generateImage();
 		  });
 		});
+
 
 		let animationRunning = false;
 		
