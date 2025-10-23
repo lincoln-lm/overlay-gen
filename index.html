@@ -298,20 +298,20 @@
 		
 			if (!userChangedTextSize && slider.id === "pixelCount") {
 			    const pixelSliderVal = Number(slider.value); 
-			    const basePixels = 9;
-			    const baseTextSize = 40;
-			    const holdPixels = 14;
+			    const holdPixels = 14;  
+			    const baseTextSize = 40; 
 			    const minTextSize = 10; 
 			
 			    if (pixelSliderVal <= holdPixels) {
-			        targetTextSize = baseTextSize - (holdPixels - basePixels) * 3; 
+			        targetTextSize = baseTextSize;
 			    } else {
 			        const extraPixels = pixelSliderVal - holdPixels;
-			        targetTextSize = Math.max(minTextSize, 25 - extraPixels * 1.2);
+			        targetTextSize = Math.max(minTextSize, baseTextSize - extraPixels * 1.2); 
 			    }
 			
-			    animateTextSize(); 
+			    animateTextSize();
 			}
+
 
 
 		
