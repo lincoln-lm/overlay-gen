@@ -597,20 +597,25 @@
         link.click();
       }
 
-	  const toggleBtn = document.getElementById('toggleTransformBtn');
-	  const transformPanel = document.getElementById('transformModalPanel');
-	
-	  if (toggleBtn && transformPanel) {
-	    toggleBtn.addEventListener('click', () => {
-	      if (getComputedStyle(transformPanel).display === 'none') {
-	        transformPanel.style.display = 'flex';
-	      } else {
-	        transformPanel.style.display = 'none';
-	      }
-	    });
-	  }
+      const toggleBtn = document.getElementById('toggleTransformBtn');
+      const transformModal = document.getElementById('transformModal');
+      const closeModal = document.getElementById('closeModal');
 
+      if (toggleBtn && transformModal) {
+        toggleBtn.addEventListener('click', () => {
+          transformModal.style.display = 'flex';
+        });
+      }
 
-	</script>
+      if (closeModal && transformModal) {
+        closeModal.addEventListener('click', () => {
+          transformModal.style.display = 'none';
+        });
+      }
+
+      transformModal.addEventListener('click', (e) => {
+        if (e.target === transformModal) transformModal.style.display = 'none';
+      });
+    </script>
   </body>
 </html>
