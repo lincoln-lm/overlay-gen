@@ -176,7 +176,7 @@
 	  <div class="modal-content">
 	    <button id="closeModal" class="close-btn">&times;</button>
 	    <h3>Transform Settings</h3>
-	    <div id="transformPanel" style="display:flex; flex-direction: column; gap:4px;">
+	    <div id="transformModalPanel" style="display:flex; flex-direction: column; gap:4px;">
 	      <span id="cropLeft">Left: 0</span>
 	      <span id="cropRight">Right: 0</span>
 	      <span id="cropTop">Top: 0</span>
@@ -184,6 +184,7 @@
 	    </div>
 	  </div>
 	</div>
+
 
     <div class="app">
       <aside class="panel" aria-label="Controls">
@@ -597,17 +598,19 @@
       }
 
 	  const toggleBtn = document.getElementById('toggleTransformBtn');
-	  const transformPanel = document.getElementById('transformPanel');
+	  const transformPanel = document.getElementById('transformModalPanel');
 	
 	  if (toggleBtn && transformPanel) {
 	    toggleBtn.addEventListener('click', () => {
-	      if (transformPanel.style.display === 'none') {
+	      if (getComputedStyle(transformPanel).display === 'none') {
 	        transformPanel.style.display = 'flex';
 	      } else {
 	        transformPanel.style.display = 'none';
 	      }
 	    });
 	  }
+
+
 	</script>
   </body>
 </html>
