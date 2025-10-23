@@ -296,21 +296,19 @@
 		    valueEl.textContent = slider.value;
 		    updateSliderBackground(slider);
 		
-			if (s.id === "pixelCount") {
-			    userChangedTextSize = false; 
-			    const pixelSliderVal = parseInt(slider.value, 10);
+			if (!userChangedTextSize) {
+			    const basePixels = 9;
+			    const baseTextSize = 40;
+			    let scaleFactor;
 			
-			    if (pixelSliderVal < 15 && !userChangedTextSize) {
-			        const basePixels = 9;
-			        const baseTextSize = 40;
-			        const scaleFactor = 3; 
-			        targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
-			        targetTextSize = Math.max(28, targetTextSize); 
-			    } else if (!userChangedTextSize) {
-			        targetTextSize = currentTextSize; 
+			    if (pixelSliderVal < 15) {
+			        scaleFactor = 3; 
+			    } else {
+			        scaleFactor = 0.5; 
 			    }
 			
-			    requestAnimationFrame(animateTextSize);
+			    targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
+			    targetTextSize = Math.max(10, targetTextSize); 
 			}
 
 
