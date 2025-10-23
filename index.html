@@ -299,13 +299,20 @@
 			if (s.id === "pixelCount") {
 			    userChangedTextSize = false; 
 			    const pixelSliderVal = parseInt(slider.value, 10);
-			    const basePixels = 9;
-			    const baseTextSize = 40;
-			    const scaleFactor = 2.5;
-			    targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
-			    targetTextSize = Math.max(10, Math.min(200, targetTextSize));
+			
+			    if (pixelSliderVal < 15 && !userChangedTextSize) {
+			        const basePixels = 9;
+			        const baseTextSize = 40;
+			        const scaleFactor = 3; 
+			        targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
+			        targetTextSize = Math.max(28, targetTextSize); 
+			    } else if (!userChangedTextSize) {
+			        targetTextSize = currentTextSize; 
+			    }
+			
 			    requestAnimationFrame(animateTextSize);
 			}
+
 
 		
 		    if (typeof generateImage === "function") generateImage();
