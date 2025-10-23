@@ -491,6 +491,8 @@
             const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
             const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
 
+			updateCanvasLabel();
+			  
             if (typeof generateImage === "function") generateImage();
             userChangedTextSize = false;
           });
