@@ -322,14 +322,23 @@
 		if (textSizeSlider) {
 		  textSizeSlider.addEventListener("input", () => {
 		    userChangedTextSize = true;
+		
 		    const v = Number(textSizeSlider.value) || 40;
+		
 		    targetTextSize = v;
+		    currentTextSize = v;
+		
+
+		    animationRunning = false;
+		
 		    const textSizeValue = document.getElementById("textSizeValue");
 		    if (textSizeValue) textSizeValue.textContent = Math.round(v);
 		    updateSliderBackground(textSizeSlider);
-		    animateTextSize();
+		
+		    if (typeof generateImage === "function") generateImage();
 		  });
 		}
+
         
         function updateSliderBackground(slider) {
           const min = Number(slider.min || 0);
