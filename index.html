@@ -300,16 +300,16 @@
 			    const pixelSliderVal = Number(slider.value); 
 			    const basePixels = 9;
 			    const baseTextSize = 40;
-			    let scaleFactor;
+			    const holdPixels = 14;
+			    const minTextSize = 10; 
 			
-			    if (pixelSliderVal < 15) {
-			        scaleFactor = 3; 
+			    if (pixelSliderVal <= holdPixels) {
+			        targetTextSize = baseTextSize - (holdPixels - basePixels) * 3; 
 			    } else {
-			        scaleFactor = 0.5; 
+			        const extraPixels = pixelSliderVal - holdPixels;
+			        targetTextSize = Math.max(minTextSize, 25 - extraPixels * 1.2);
 			    }
 			
-			    targetTextSize = baseTextSize - (pixelSliderVal - basePixels) * scaleFactor;
-			    targetTextSize = Math.max(10, targetTextSize); 
 			    animateTextSize(); 
 			}
 
