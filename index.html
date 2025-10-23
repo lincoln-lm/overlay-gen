@@ -62,6 +62,11 @@
         color: #111827;
         font-size: 13px;
       }
+	  #transformPanel span {
+	    font-size: 13px;
+	    color: var(--muted);
+	  }
+
       .colour-wrap { display: flex; align-items: center; gap: 8px; }
       input[type="color"] { width: 46px; height: 34px; border-radius: 6px; padding: 0; border: 0; }
       input[type="text"].hex { width: 90px; }
@@ -229,6 +234,16 @@
             <button class="primary" id="downloadBtn" onclick="downloadImage()" disabled>Download</button>
             <button class="ghost" id="resetBtn" type="button">Reset</button>
           </div>
+		  <div style="margin-top:12px;">
+ 			 <button class="ghost" id="toggleTransformBtn" type="button">Transform Settings</button>
+		  </div>
+
+		 <div class="row" id="transformPanel" style="display:none; flex-direction: column; gap: 4px; margin-top: 6px;">
+		   <span id="cropLeft">Left: 0</span>
+		   <span id="cropRight">Right: 0</span>
+		   <span id="cropTop">Top: 0</span>
+		   <span id="cropBottom">Bottom: 0</span>
+		 </div>
         </div>
       </aside>
 
@@ -522,6 +537,19 @@
         link.download = 'overlay.png';
         link.click();
       }
-    </script>
+
+	  const toggleBtn = document.getElementById('toggleTransformBtn');
+	  const transformPanel = document.getElementById('transformPanel');
+	
+	  if (toggleBtn && transformPanel) {
+	    toggleBtn.addEventListener('click', () => {
+	      if (transformPanel.style.display === 'none') {
+	        transformPanel.style.display = 'flex';
+	      } else {
+	        transformPanel.style.display = 'none';
+	      }
+	    });
+	  }
+	</script>
   </body>
 </html>
