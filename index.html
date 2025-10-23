@@ -319,11 +319,17 @@
         ];
 
         const textSizeSlider = document.getElementById("textSize");
-        if (textSizeSlider) {
-          textSizeSlider.addEventListener("input", () => {
-            userChangedTextSize = true;
-          });
-        }
+		if (textSizeSlider) {
+		  textSizeSlider.addEventListener("input", () => {
+		    userChangedTextSize = true;
+		    const v = Number(textSizeSlider.value) || 40;
+		    targetTextSize = v;
+		    const textSizeValue = document.getElementById("textSizeValue");
+		    if (textSizeValue) textSizeValue.textContent = Math.round(v);
+		    updateSliderBackground(textSizeSlider);
+		    animateTextSize();
+		  });
+		}
         
         function updateSliderBackground(slider) {
           const min = Number(slider.min || 0);
@@ -372,20 +378,43 @@
 		      }
 		    }
 		
-		    if (slider.id === "pixelHeight") {
-		      const pixelHeightVal = Number(slider.value); 
+			if (slider.id === "pixelHeight") {
+			  const pixelHeightVal = Number(slider.value);
+			
+			  const points = [
+			    { h: 8, s: 40 },
+			    { h: 7, s: 50 },
+			    { h: 5, s: 70 },
+			    { h: 2, s: 85 }
+			  ];
+			
+			  function mapPixelHeightToTextSize(h) {
+			    if (h >= points[0].h) return points[0].s;
+			
+			    for (let i = 0; i < points.length - 1; i++) {
+			      const a = points[i];
+			      const b = points[i + 1];
+			      if (h <= a.h && h >= b.h) {
+			        const t = (h - b.h) / (a.h - b.h);
+			        const size = b.s + t * (a.s - b.s);
+			        return Math.round(size);
+			      }
+			    }
+			
+			    const last = points[points.length - 1];     
+			    const prev = points[points.length - 2];     
+			    const slope = (last.s - prev.s) / (last.h - prev.h); 
+			    const extrapolated = last.s + slope * (h - last.h); 
+			    return Math.round(extrapolated);
+			  }
+			
+			  const mappedSize = mapPixelHeightToTextSize(pixelHeightVal);
+			
+			  userChangedTextSize = false;     
+			  targetTextSize = Math.max(1, Math.min(200, mappedSize)); 
+			  animateTextSize();
+			}
 
-		      let targetFromHeight = 40;
-		      if (pixelHeightVal <= 8) {
-		        targetFromHeight = 40 + (8 - pixelHeightVal) * 8; 
-		        if (targetFromHeight > 100) targetFromHeight = 100;
-		      }
-		
-		      if (!userChangedTextSize) {
-		        targetTextSize = Math.max(targetTextSize, Math.round(targetFromHeight));
-		        animateTextSize();
-		      }
-		    }
 		
 		    if (typeof generateImage === "function") generateImage();
 		  });
@@ -395,33 +424,35 @@
 		let animationRunning = false;
 		
 		function animateTextSize() {
-		  if(animationRunning) return;
-		  animationRunning = true;
+		  if (!animationRunning) {
+		    animationRunning = true;
 		
-		  function step() {
-		    const textSizeSlider = document.getElementById('textSize');
-		    const textSizeValue = document.getElementById('textSizeValue');
-		    const ease = 0.1;
-		    currentTextSize += (targetTextSize - currentTextSize) * ease;
+		    function step() {
+		      const textSizeSlider = document.getElementById('textSize');
+		      const textSizeValue = document.getElementById('textSizeValue');
+		      const ease = 0.1;
+		      currentTextSize += (targetTextSize - currentTextSize) * ease;
 		
-		    if (textSizeSlider && textSizeValue) {
-		      textSizeSlider.value = Math.round(currentTextSize);
-		      textSizeValue.textContent = Math.round(currentTextSize);
-		      updateSliderBackground(textSizeSlider);
+		      if (textSizeSlider && textSizeValue) {
+		        textSizeSlider.value = Math.round(currentTextSize);
+		        textSizeValue.textContent = Math.round(currentTextSize);
+		        updateSliderBackground(textSizeSlider);
+		      }
+		
+		      if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
+		        requestAnimationFrame(step);
+		      } else {
+		        currentTextSize = targetTextSize;
+		        animationRunning = false;
+		      }
+		
+		      if (typeof generateImage === "function") generateImage();
 		    }
 		
-		    if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
-		      requestAnimationFrame(step);
-		    } else {
-		      currentTextSize = targetTextSize;
-		      animationRunning = false;
-		    }
-		
-		    if (typeof generateImage === "function") generateImage();
+		    step();
 		  }
-		
-		  step();
 		}
+
 		
         const resetBtn = document.getElementById("resetBtn");
         if (resetBtn) {
