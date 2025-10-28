@@ -444,60 +444,72 @@
 		    valueEl.textContent = slider.value;
 		    updateSliderBackground(slider);
 		
-        if (slider.id === "pixelCount") {
-          const pixelSliderVal = Number(slider.value);
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-          if (!userChangedTextSize) {
-            if (pixelSliderVal > 9) {
-              targetTextSize = 25;
-            } else {
-              targetTextSize = 40;
+        function mapFromPoints(h, points) {
+          if (h >= points[0].h) return points[0].s;
+          for (let i = 0; i < points.length - 1; i++) {
+            const a = points[i], b = points[i + 1];
+            if (h <= a.h && h >= b.h) {
+              const t = (h - b.h) / (a.h - b.h);
+              const size = b.s + t * (a.s - b.s);
+              return Math.round(size);
             }
-            animateTextSize();
           }
+          const last = points[points.length - 1];
+          const prev = points[points.length - 2];
+          const slope = (last.s - prev.s) / (last.h - prev.h);
+          return Math.round(last.s + slope * (h - last.h));
         }
 
-        if (slider.id === "pixelHeight") {
-          const pixelHeightVal = Number(slider.value);
+        function updateAutoTextSize() {
+          if (userChangedTextSize) return;
 
-          const points = [
+          const pixelCountVal = Number(document.getElementById("pixelCount").value);
+          const pixelHeightVal = Number(document.getElementById("pixelHeight").value);
+
+          const defaultPoints = [
             { h: 8, s: 40 },
             { h: 7, s: 50 },
             { h: 5, s: 70 },
             { h: 2, s: 85 }
           ];
 
-          function mapPixelHeightToTextSize(h) {
-            if (h >= points[0].h) return points[0].s;
+          const mapA = [
+            { h: 8, s: 25 },
+            { h: 7, s: 30 },
+            { h: 5, s: 40 },
+            { h: 2, s: 85 }
+          ];
 
-            for (let i = 0; i < points.length - 1; i++) {
-              const a = points[i];
-              const b = points[i + 1];
-              if (h <= a.h && h >= b.h) {
-                const t = (h - b.h) / (a.h - b.h);
-                const size = b.s + t * (a.s - b.s);
-                return Math.round(size);
-              }
-            }
+          const mapB = [
+            { h: 8, s: 20 },
+            { h: 7, s: 30 },
+            { h: 5, s: 45 },
+            { h: 2, s: 85 }
+          ];
 
-            const last = points[points.length - 1];
-            const prev = points[points.length - 2];
-            const slope = (last.s - prev.s) / (last.h - prev.h);
-            const extrapolated = last.s + slope * (h - last.h);
-            return Math.round(extrapolated);
-          }
-
-          if (!userChangedTextSize) {
+          if (pixelCountVal <= 9) {
             if (pixelHeightVal >= 8) {
               targetTextSize = 40;
-              animateTextSize();
             } else {
-              const mappedSize = mapPixelHeightToTextSize(pixelHeightVal);
-              targetTextSize = Math.max(1, Math.min(200, mappedSize));
-              animateTextSize();
+              targetTextSize = clamp(mapFromPoints(pixelHeightVal, defaultPoints), 1, 200);
             }
+          } else if (pixelCountVal <= 19) {
+            targetTextSize = clamp(mapFromPoints(pixelHeightVal, mapA), 1, 200);
+          } else { 
+            targetTextSize = clamp(mapFromPoints(pixelHeightVal, mapB), 1, 200);
           }
+
+          animateTextSize();
         }
+
+
+
+        if (slider.id === "pixelCount" || slider.id === "pixelHeight") {
+          updateAutoTextSize();
+        }
+
 		
 		    if (typeof generateImage === "function") generateImage();
 		  });
