@@ -357,6 +357,14 @@
             </select>
           </div>
 
+          <div class="row">
+            <label for="overlayWidth">Overlay width</label>
+            <select id="overlayWidth">
+              <option value="60" selected>60</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
             <button class="primary" id="downloadBtn" onclick="downloadImage()" disabled>Download</button>
             <button class="ghost" id="resetBtn" type="button">Reset</button>
@@ -431,6 +439,13 @@
 		    document.fonts.load(fontSpec).then(() => generateImage());
 		  });
 		}
+
+    const overlayWidthSelect = document.getElementById('overlayWidth');
+    if (overlayWidthSelect) {
+      overlayWidthSelect.addEventListener('change', () => {
+        if (typeof generateImage === 'function') generateImage();
+      });
+    }
 		
 		sliders.forEach((s) => {
 		  const slider = document.getElementById(s.id);
@@ -581,6 +596,9 @@
             const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
             const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
 
+            const overlayWidthSelect = document.getElementById("overlayWidth");
+            if (overlayWidthSelect) { overlayWidthSelect.value = "60"; }
+
 			updateCanvasLabel();
 			  
             if (typeof generateImage === "function") generateImage();
@@ -680,7 +698,9 @@
         ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.globalAlpha = 1;
 
-        const pixelWidth = canvasWidth/60;
+        const blocksWide = parseInt((document.getElementById('overlayWidth')||{}).value, 10) || 60;
+        const pixelWidth = Math.max(1, canvasWidth / blocksWide);
+
         const pixelHeight = Math.max(1, Math.round((canvasHeight * pixelHeightPct)/100));
         const pixelY = Math.round(canvasHeight/2 - pixelHeight/2);
 
@@ -731,14 +751,13 @@
         const dl = document.getElementById('downloadBtn');
         if(dl) dl.disabled = false;
 
+    const CENTER_WIDTH = blocksWide;
+    const CENTER_HEIGHT = 580;
 
-		const CENTER_WIDTH = 60;
-		const CENTER_HEIGHT = 580;
-		
-		const left = Math.max(0, Math.round((canvasWidth - CENTER_WIDTH) / 2));
-		const right = left; // symmetric
-		const top = Math.max(0, Math.round((canvasHeight - CENTER_HEIGHT) / 2));
-		const bottom = top; // symmetric
+    const left = Math.max(0, Math.round((canvasWidth - CENTER_WIDTH) / 2));
+    const right = left;
+    const top = Math.max(0, Math.round((canvasHeight - CENTER_HEIGHT) / 2));
+    const bottom = top; 
 		
 		const hEl = document.getElementById('cropHorizontal');
 		const vEl = document.getElementById('cropVertical');
