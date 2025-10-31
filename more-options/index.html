@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Overlay Generator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&family=Montserrat:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,700;1,400&family=Lato:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&family=Poppins:ital,wght@0,400;0,700&family=Fira+Code:wght@400;700&family=Source+Sans+Pro:ital,wght@0,400;0,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #17171b;
+        --panel: #1f2126;
+        --muted: #bfc7d9;
+        --accent: #3b66ad;
+        --card: #23262b;
+        --radius: 10px;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(180deg, var(--bg), #0f0f11);
+        color: var(--muted);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        align-items: stretch;
+        padding: 20px;
+        gap: 20px;
+      }
+      .app {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 460px 1fr;
+        gap: 20px;
+        align-items: start;
+        margin: auto;
+        max-width: 1400px;
+      }
+      .panel {
+        background: var(--panel);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 560px;
+      }
+      .panel h2 { margin: 0 0 4px 0; color: #fff; font-size: 18px; letter-spacing: 0.2px; }
+      .controls { display: flex; flex-direction: column; gap: 10px; overflow: auto; padding-right: 6px; }
+      .row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+      label { font-size: 13px; color: var(--muted); min-width: 160px; }
+      input[type="number"], input[type="text"], select {
+        width: 120px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        background: #f4f6fa;
+        color: #111827;
+        font-size: 13px;
+      }
+	  #transformPanel span {
+	    font-size: 13px;
+	    color: var(--muted);
+	  }
+
+      .colour-wrap { display: flex; align-items: center; gap: 8px; }
+      input[type="color"] { width: 46px; height: 34px; border-radius: 6px; padding: 0; border: 0; }
+      input[type="text"].hex { width: 90px; }
+      .slider-controls { display: flex; align-items: center; gap: 12px; width: 260px; }
+      input[type="range"] { flex: 1; height: 10px; background: transparent; }
+      input[type="range"]::-webkit-slider-runnable-track { height: 10px; border-radius: 10px; background: #d9d9d9; }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 18px;
+        width: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        margin-top: -4px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      }
+      .value-badge {
+        min-width: 48px;
+        text-align: center;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0b1220;
+        font-weight: 600;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+        font-size: 13px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+
+        transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease, color 160ms ease;
+        will-change: transform, box-shadow;
+        box-shadow: 0 6px 14px rgba(59,102,173,0.12);
+      }
+
+      button.primary:not(:disabled):hover,
+      button.primary:not(:disabled):focus-visible {
+        background-color: #2f5aa0;            
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(59,102,173,0.18);
+        outline: none;
+        color: #fff;
+      }
+
+      button.primary:not(:disabled):active {
+        transform: translateY(0);
+        box-shadow: 0 6px 12px rgba(59,102,173,0.12);
+      }
+
+      button.ghost {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+
+        transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, color 160ms ease;
+        will-change: transform, background-color;
+      }
+
+      button.ghost:not(:disabled):hover,
+      button.ghost:not(:disabled):focus-visible {
+        background-color: rgba(255,255,255,0.03);   
+        border-color: rgba(255,255,255,0.12);      
+        color: white;
+        transform: translateY(-1px);
+        outline: none;
+      }
+
+      button.ghost:not(:disabled):active {
+        transform: translateY(0);
+        background-color: rgba(255,255,255,0.02);
+      }
+
+
+      button:focus-visible {
+        box-shadow: 0 0 0 3px rgba(59,102,173,0.18);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        button.primary,
+        button.ghost {
+          transition: none;
+          transform: none;
+        }
+      }
+
+      .preview {
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius: var(--radius);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 560px;
+        align-items: stretch;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      }
+      .canvas-wrap {
+        background: var(--card);
+        border-radius: 8px;
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      canvas {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 6px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        height: auto;
+        border: 2px solid rgba(255, 255, 255, 0.04);
+      }
+      .top-actions { display: flex; gap: 8px; align-items: center; }
+
+	.modal {
+	  position: fixed;
+	  top: 0; left: 0;
+	  width: 100%; height: 100%;
+	  display: none;
+	  align-items: center;
+	  justify-content: center;
+	  background: rgba(0,0,0,0.4);
+	  backdrop-filter: blur(4px);
+	  z-index: 1000;
+	}
+	
+	.modal-content {
+	  background: var(--panel);
+	  padding: 20px;
+	  border-radius: var(--radius);
+	  min-width: 300px;
+	  max-width: 400px;
+	  color: var(--muted);
+	  position: relative;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 8px;
+	}
+	
+	.close-btn {
+	  position: static; /* remove absolute positioning */
+	  font-size: 20px;
+	  background: transparent;
+	  border: none;
+	  color: var(--muted);
+	  cursor: pointer;
+	}
+	.modal-header h3 {
+	  color: #fff;
+	  font-size: 18px;
+	}
+
+
+      .small { font-size: 12px; color: var(--muted); }
+      @media (max-width: 900px) {
+        .app { grid-template-columns: 1fr; }
+        body { padding: 12px; }
+      }
+    </style>
+  </head>
+
+  <body>
+	<div id="transformModal" class="modal">
+	  <div class="modal-content">
+	    <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;">
+	      <h3 style="margin:0;">Transform Settings</h3>
+	      <button id="closeModal" class="close-btn">&times;</button>
+	    </div>
+		<div id="transformModalPanel" style="display:flex; flex-direction: column; gap:8px;">
+		  <span id="cropHorizontal">Left: 0 Right: 0</span>
+		  <span id="cropVertical">Top: 0 Bottom: 0</span>
+		</div>
+	  </div>
+	</div>
+    <div class="app">
+      <aside class="panel" aria-label="Controls">
+        <h2>Overlay Generator</h2>
+        <div class="controls">
+          <div class="row">
+            <label for="canvasWidth">OBS canvas width</label>
+            <input type="number" id="canvasWidth" value="1920" min="1" />
+          </div>
+
+          <div class="row">
+            <label for="canvasHeight">OBS canvas height</label>
+            <input type="number" id="canvasHeight" value="1080" min="1" />
+          </div>
+
+          <div class="row">
+            <label for="colour1">Primary colour</label>
+            <div class="colour-wrap">
+              <input type="text" id="colour1Text" class="hex" placeholder="#RRGGBB"/>
+              <input type="color" id="colour1" value="#ffb0c5" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="colour2">Secondary colour</label>
+            <div class="colour-wrap">
+              <input type="text" id="colour2Text" class="hex" placeholder="#RRGGBB"/>
+              <input type="color" id="colour2" value="#99cdf0" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="colourText">Text colour</label>
+            <div class="colour-wrap">
+              <input type="text" id="colourTextText" class="hex" placeholder="#RRGGBB"/>
+              <input type="color" id="colourText" value="#000000" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="pixelCount">Number of pixels</label>
+            <div class="slider-controls">
+              <input type="range" id="pixelCount" value="9" min="1" max="50" aria-label="Number of pixels"/>
+              <div class="value-badge" id="pixelCountValue">9</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="pixelHeight">Pixel height</label>
+            <div class="slider-controls">
+              <input type="range" id="pixelHeight" value="8" min="1" max="50" aria-label="Pixel height"/>
+              <div class="value-badge" id="pixelHeightValue">8</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="opacityPixels">Opacity (pixels)</label>
+            <div class="slider-controls">
+              <input type="range" id="opacityPixels" value="100" min="0" max="100" aria-label="Opacity pixels"/>
+              <div class="value-badge" id="opacityPixelsValue">100</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="opacityText">Opacity (text)</label>
+            <div class="slider-controls">
+              <input type="range" id="opacityText" value="100" min="0" max="100" aria-label="Opacity text"/>
+              <div class="value-badge" id="opacityTextValue">100</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="textSize">Text size</label>
+            <div class="slider-controls">
+              <input type="range" id="textSize" value="40" min="10" max="200" aria-label="Text size"/>
+              <div class="value-badge" id="textSizeValue">40</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="fontStyle">Font</label>
+            <select id="fontStyle">
+              <option value="Inter-400">Inter</option>
+              <option value="Inter-700">Inter Bold</option>
+              <option value="Roboto-400">Roboto</option>
+              <option value="Roboto-700">Roboto Bold</option>
+              <option value="Roboto-400i">Roboto Italic</option>
+              <option value="Oswald-400">Oswald</option>
+              <option value="Oswald-700">Oswald Bold</option>
+              <option value="Montserrat-400">Montserrat</option>
+              <option value="Montserrat-700">Montserrat Bold</option>
+              <option value="Open Sans-400">Open Sans</option>
+              <option value="Lato-400">Lato</option>
+              <option value="JetBrains Mono-400">JetBrains Mono</option>
+              <option value="JetBrains Mono-700">JetBrains Mono Bold</option>
+              <option value="Poppins-400">Poppins</option>
+              <option value="Poppins-700">Poppins Bold</option>
+              <option value="Fira Code-400">Fira Code</option>
+              <option value="Fira Code-700">Fira Code Bold</option>
+              <option value="Source Sans Pro-400">Source Sans Pro</option>
+              <option value="Source Sans Pro-700">Source Sans Pro Bold</option>
+            </select>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+            <button class="primary" id="downloadBtn" onclick="downloadImage()" disabled>Download</button>
+            <button class="ghost" id="resetBtn" type="button">Reset</button>
+			<button class="ghost" id="toggleTransformBtn" type="button">Transform Settings</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="preview">
+        <div class="top-actions">
+          <div style="flex: 1">Preview</div>
+          <div class="small">
+            Canvas: <span id="currentCanvas">1920×1080</span>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="canvas" width="1280" height="720"></canvas>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+      let userChangedTextSize = false;
+      let currentTextSize = 40;
+      let targetTextSize = 40;
+      
+        const sliders = [
+          { id: "pixelCount", valueEl: "pixelCountValue" },
+          { id: "pixelHeight", valueEl: "pixelHeightValue" },
+          { id: "opacityPixels", valueEl: "opacityPixelsValue" },
+          { id: "opacityText", valueEl: "opacityTextValue" },
+          { id: "textSize", valueEl: "textSizeValue" }
+        ];
+
+        const textSizeSlider = document.getElementById("textSize");
+		if (textSizeSlider) {
+		  textSizeSlider.addEventListener("input", () => {
+		    userChangedTextSize = true;
+		
+		    const v = Number(textSizeSlider.value) || 40;
+		
+		    targetTextSize = v;
+		    currentTextSize = v;
+		
+
+		    animationRunning = false;
+		
+		    const textSizeValue = document.getElementById("textSizeValue");
+		    if (textSizeValue) textSizeValue.textContent = Math.round(v);
+		    updateSliderBackground(textSizeSlider);
+		
+		    if (typeof generateImage === "function") generateImage();
+		  });
+		}
+
+        
+        function updateSliderBackground(slider) {
+          const min = Number(slider.min || 0);
+          const max = Number(slider.max || 100);
+          const val = Number(slider.value || 0);
+          const pct = ((val - min) / (max - min)) * 100;
+          slider.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d9d9d9 ${pct}%)`;
+        }
+
+		const fontSelect = document.getElementById('fontStyle');
+		if (fontSelect) {
+		  fontSelect.addEventListener('change', () => {
+		    const fontStyle = getFontStyle();
+		    const fontSpec = `${fontStyle.style} ${fontStyle.weight} 40px "${fontStyle.family}"`;
+		    document.fonts.load(fontSpec).then(() => generateImage());
+		  });
+		}
+		
+		sliders.forEach((s) => {
+		  const slider = document.getElementById(s.id);
+		  const valueEl = document.getElementById(s.valueEl);
+		  if (!slider || !valueEl) return;
+		
+		  valueEl.textContent = slider.value;
+		  updateSliderBackground(slider);
+		
+		  slider.addEventListener("input", () => {
+		    valueEl.textContent = slider.value;
+		    updateSliderBackground(slider);
+		
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+        function mapFromPoints(h, points) {
+          if (h >= points[0].h) return points[0].s;
+          for (let i = 0; i < points.length - 1; i++) {
+            const a = points[i], b = points[i + 1];
+            if (h <= a.h && h >= b.h) {
+              const t = (h - b.h) / (a.h - b.h);
+              const size = b.s + t * (a.s - b.s);
+              return Math.round(size);
+            }
+          }
+          const last = points[points.length - 1];
+          const prev = points[points.length - 2];
+          const slope = (last.s - prev.s) / (last.h - prev.h);
+          return Math.round(last.s + slope * (h - last.h));
+        }
+
+        function updateAutoTextSize() {
+          if (userChangedTextSize) return;
+
+          const pixelCountVal = Number(document.getElementById("pixelCount").value);
+          const pixelHeightVal = Number(document.getElementById("pixelHeight").value);
+
+          const defaultPoints = [
+            { h: 8, s: 40 },
+            { h: 7, s: 50 },
+            { h: 5, s: 70 },
+            { h: 2, s: 85 }
+          ];
+
+          const mapA = [
+            { h: 8, s: 25 },
+            { h: 7, s: 30 },
+            { h: 5, s: 40 },
+            { h: 2, s: 85 }
+          ];
+
+          const mapB = [
+            { h: 8, s: 20 },
+            { h: 7, s: 30 },
+            { h: 5, s: 45 },
+            { h: 2, s: 85 }
+          ];
+
+          if (pixelCountVal <= 9) {
+            if (pixelHeightVal >= 8) {
+              targetTextSize = 40;
+            } else {
+              targetTextSize = clamp(mapFromPoints(pixelHeightVal, defaultPoints), 1, 200);
+            }
+          } else if (pixelCountVal <= 19) {
+            targetTextSize = clamp(mapFromPoints(pixelHeightVal, mapA), 1, 200);
+          } else { 
+            targetTextSize = clamp(mapFromPoints(pixelHeightVal, mapB), 1, 200);
+          }
+
+          animateTextSize();
+        }
+
+
+
+        if (slider.id === "pixelCount" || slider.id === "pixelHeight") {
+          updateAutoTextSize();
+        }
+
+		
+		    if (typeof generateImage === "function") generateImage();
+		  });
+		});
+
+
+		let animationRunning = false;
+		
+		function animateTextSize() {
+		  if (!animationRunning) {
+		    animationRunning = true;
+		
+		    function step() {
+		      const textSizeSlider = document.getElementById('textSize');
+		      const textSizeValue = document.getElementById('textSizeValue');
+		      const ease = 0.1;
+		      currentTextSize += (targetTextSize - currentTextSize) * ease;
+		
+		      if (textSizeSlider && textSizeValue) {
+		        textSizeSlider.value = Math.round(currentTextSize);
+		        textSizeValue.textContent = Math.round(currentTextSize);
+		        updateSliderBackground(textSizeSlider);
+		      }
+		
+		      if (Math.abs(currentTextSize - targetTextSize) > 0.5) {
+		        requestAnimationFrame(step);
+		      } else {
+		        currentTextSize = targetTextSize;
+		        animationRunning = false;
+		      }
+		
+		      if (typeof generateImage === "function") generateImage();
+		    }
+		
+		    step();
+		  }
+		}
+
+		
+        const resetBtn = document.getElementById("resetBtn");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            document.getElementById("canvasWidth").value = 1920;
+            document.getElementById("canvasHeight").value = 1080;
+
+            const p = document.getElementById("pixelCount");
+            if (p) { p.value = 9; document.getElementById("pixelCountValue").textContent = 9; updateSliderBackground(p); }
+
+            const ph = document.getElementById("pixelHeight");
+            if (ph) {
+              ph.value = 8;
+              document.getElementById("pixelHeightValue").textContent = 8;
+              updateSliderBackground(ph);
+            }
+
+            const op = document.getElementById("opacityPixels");
+            if (op) { op.value = 100; document.getElementById("opacityPixelsValue").textContent = 100; updateSliderBackground(op); }
+
+            const ot = document.getElementById("opacityText");
+            if (ot) { ot.value = 100; document.getElementById("opacityTextValue").textContent = 100; updateSliderBackground(ot); }
+
+            const t = document.getElementById("textSize");
+            if (t) { t.value = 40; document.getElementById("textSizeValue").textContent = 40; updateSliderBackground(t); }
+
+            const fontSelect = document.getElementById("fontStyle");
+            if (fontSelect) { fontSelect.value = "Inter-400"; }
+            
+            const c1 = document.getElementById("colour1"); if (c1) c1.value = "#ffb0c5";
+            const c2 = document.getElementById("colour2"); if (c2) c2.value = "#99cdf0";
+            const ct = document.getElementById("colourText"); if (ct) ct.value = "#000000";
+
+			updateCanvasLabel();
+			  
+            if (typeof generateImage === "function") generateImage();
+            userChangedTextSize = false;
+
+            resetBtn.blur();
+          });
+        }
+
+		function updateCanvasLabel() {
+		  const w = document.getElementById("canvasWidth").value || "0";
+		  const h = document.getElementById("canvasHeight").value || "0";
+		  const el = document.getElementById("currentCanvas");
+		  if (el) el.textContent = w + "×" + h;
+		  if (typeof generateImage === "function") generateImage();
+		}
+
+        ["canvasWidth","canvasHeight"].forEach((id) => document.getElementById(id).addEventListener("input", updateCanvasLabel));
+        updateCanvasLabel();
+
+        const colorPairs = [
+          { txt: "colour1Text", pick: "colour1" },
+          { txt: "colour2Text", pick: "colour2" },
+          { txt: "colourTextText", pick: "colourText" },
+        ];
+        colorPairs.forEach(({ txt, pick }) => {
+          const t = document.getElementById(txt);
+          const p = document.getElementById(pick);
+          if (!t || !p) return;
+
+          t.value = p.value.toUpperCase();
+
+          t.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+              p.value = val;
+              if (typeof generateImage === "function") generateImage();
+            }
+          });
+
+          p.addEventListener("input", () => {
+            t.value = p.value.toUpperCase();
+            if (typeof generateImage === "function") generateImage();
+          });
+        });
+
+        if (typeof generateImage === "function") generateImage();
+      });
+
+      function updateSliderBackground(slider) {
+        const value = ((slider.value - slider.min)/(slider.max - slider.min))*100;
+        slider.style.backgroundSize = value + '% 100%';
+      }
+
+      function getFontStyle() {
+        const fontSelect = document.getElementById('fontStyle');
+        if (!fontSelect) { return { family:'Consolas', weight:'400', style:'normal' }; }
+        const [fontFamily, weightStyle] = fontSelect.value.split('-');
+        let weight = '400';
+        let style = 'normal';
+        if (weightStyle && weightStyle.endsWith('i')) { weight = weightStyle.slice(0,-1); style='italic'; }
+        else if (weightStyle) weight = weightStyle;
+        return { family: fontFamily, weight: weight, style: style };
+      }
+
+      function generateImage() {
+        var canvasWidth = parseInt(document.getElementById('canvasWidth').value,10);
+        var canvasHeight = parseInt(document.getElementById('canvasHeight').value,10);
+        var pixels = parseInt(document.getElementById('pixelCount').value,10);
+        var color1 = (document.getElementById('colour1')||{}).value || '#ffb0c5';
+        var color2 = (document.getElementById('colour2')||{}).value || '#99cdf0';
+        var colorText = (document.getElementById('colourText')||{}).value || 'black';
+        var opacityPixels = parseInt((document.getElementById('opacityPixels')||{}).value,10);
+        if (isNaN(opacityPixels)) opacityPixels = 100;
+        var opacityText = parseInt((document.getElementById('opacityText')||{}).value,10);
+        if (isNaN(opacityText)) opacityText = 100;
+        var pixelHeightPct = parseInt((document.getElementById('pixelHeight')||{}).value,10) || 8;
+        const fontStyle = getFontStyle();
+
+        const c1Text = document.getElementById('colour1Text');
+        const c2Text = document.getElementById('colour2Text');
+        const cTextText = document.getElementById('colourTextText');
+        if (c1Text) c1Text.value = color1.toUpperCase();
+        if (c2Text) c2Text.value = color2.toUpperCase();
+        if (cTextText) cTextText.value = colorText.toUpperCase();
+
+        var canvas = document.getElementById('canvas');
+        if (!canvas) return;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        var ctx = canvas.getContext('2d');
+        if (canvasWidth<=0||canvasHeight<=0) return;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 0;
+        ctx.fillStyle='white';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.globalAlpha = 1;
+
+        const pixelWidth = canvasWidth/60;
+        const pixelHeight = Math.max(1, Math.round((canvasHeight * pixelHeightPct)/100));
+        const pixelY = Math.round(canvasHeight/2 - pixelHeight/2);
+
+        const textSizeInput = parseInt((document.getElementById('textSize')||{}).value, 10) || 40;
+
+        let desiredFontSize;
+        if (pixelHeightPct >= 8) {
+          desiredFontSize = textSizeInput; 
+        } else {
+          const textSizePercent = textSizeInput / 100;
+          desiredFontSize = Math.max(1, Math.round(pixelHeight * textSizePercent));
+        }
+
+        function setFont(size){ ctx.font = `${fontStyle.style} ${fontStyle.weight} ${size}px "${fontStyle.family}"`; }
+
+
+        const sampleText = Math.max(Math.abs(pixels),1).toString();
+        setFont(desiredFontSize);
+        let textWidth = ctx.measureText(sampleText).width;
+        const maxAllowedWidth = Math.max(pixelWidth-10,6);
+        const fontSize = Math.max(1,Math.floor(desiredFontSize));
+        setFont(fontSize);
+
+        for(let i=-pixels;i<pixels;i++){
+          var pixelX = canvasWidth/2 + i*pixelWidth;
+          ctx.globalAlpha = opacityPixels/100;
+          ctx.fillStyle = (Math.abs(i%2)===1) ? color2 : color1;
+          ctx.fillRect(pixelX, pixelY, pixelWidth, pixelHeight);
+
+          var num = i<0?Math.abs(i):i+1;
+          ctx.globalAlpha = opacityText/100;
+          setFont(fontSize);
+          ctx.fillStyle = colorText;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(num, pixelX + pixelWidth/2, pixelY + pixelHeight/2);
+        }
+
+        ctx.globalAlpha = 1;
+
+        var crosshairWidth = 0.003125*canvasWidth;
+        var crosshairHeight = canvasHeight;
+        var crosshairX = canvasWidth/2 - crosshairWidth;
+        var crosshairY = 0;
+        ctx.fillStyle = '#e8e8e8';
+        ctx.fillRect(crosshairX, crosshairY, crosshairWidth, crosshairHeight);
+
+        const dl = document.getElementById('downloadBtn');
+        if(dl) dl.disabled = false;
+
+
+		const CENTER_WIDTH = 60;
+		const CENTER_HEIGHT = 580;
+		
+		const left = Math.max(0, Math.round((canvasWidth - CENTER_WIDTH) / 2));
+		const right = left; // symmetric
+		const top = Math.max(0, Math.round((canvasHeight - CENTER_HEIGHT) / 2));
+		const bottom = top; // symmetric
+		
+		const hEl = document.getElementById('cropHorizontal');
+		const vEl = document.getElementById('cropVertical');
+		
+		if (hEl) hEl.textContent = `Left: ${left} Right: ${right}`;
+		if (vEl) vEl.textContent = `Top: ${top} Bottom: ${bottom}`;
+
+      }
+
+      function downloadImage() {
+        var canvas = document.getElementById('canvas');
+        if(!canvas) return;
+        var link = document.createElement('a');
+        link.href = canvas.toDataURL();
+        link.download = 'overlay.png';
+        link.click();
+      }
+
+      const toggleBtn = document.getElementById('toggleTransformBtn');
+      const transformModal = document.getElementById('transformModal');
+      const closeModal = document.getElementById('closeModal');
+
+      if (toggleBtn && transformModal) {
+        toggleBtn.addEventListener('click', () => {
+          transformModal.style.display = 'flex';
+        });
+      }
+
+      if (closeModal && transformModal) {
+        closeModal.addEventListener('click', () => {
+          transformModal.style.display = 'none';
+        });
+      }
+
+      transformModal.addEventListener('click', (e) => {
+        if (e.target === transformModal) transformModal.style.display = 'none';
+      });
+    </script>
+  </body>
+</html>
