@@ -731,6 +731,7 @@
           ctx.fillRect(pixelX, pixelY, pixelWidth, pixelHeight);
 
           var num = i<0?Math.abs(i):i+1;
+          num = num % 10;
           ctx.globalAlpha = opacityText/100;
           setFont(fontSize);
           ctx.fillStyle = colorText;
